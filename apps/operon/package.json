@@ -1,5 +1,5 @@
 {
-    "name": "operon",
+    "name": "operone",
     "version": "0.1.0",
     "type": "module",
     "private": true,
@@ -36,15 +36,15 @@
         "wait-on": "^8.0.3"
     },
     "build": {
-        "appId": "com.operon.app",
+        "appId": "com.operone.app",
         "productName": "Operon",
         "mac": {
             "category": "public.app-category.productivity"
         },
         "protocols": {
-            "name": "operon",
+            "name": "operone",
             "schemes": [
-                "operon"
+                "operone"
             ]
         }
     }

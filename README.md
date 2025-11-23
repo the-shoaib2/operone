@@ -5,10 +5,10 @@ A monorepo project featuring a Next.js web application with OAuth authentication
 ## 🏗️ Project Structure
 
 ```
-operon/
+operone/
 ├── apps/
 │   ├── web/          # Next.js web app with OAuth
-│   └── operon/       # Electron desktop app
+│   └── operone/       # Electron desktop app
 ├── packages/
 │   ├── ui/           # Shared UI components
 │   ├── eslint-config/
@@ -32,10 +32,10 @@ operon/
 - ✅ Session management
 - ✅ Deep-link support for desktop app
 
-### Desktop App (`apps/operon`)
+### Desktop App (`apps/operone`)
 - ✅ Electron 34 with Vite
 - ✅ React 19 with TypeScript
-- ✅ Deep-link protocol handler (`operon://`)
+- ✅ Deep-link protocol handler (`operone://`)
 - ✅ Browser-based authentication flow
 - ✅ Secure token storage
 - ✅ Modern gradient UI
@@ -62,7 +62,7 @@ Create or update `apps/web/.env`:
 
 ```bash
 # Database (PostgreSQL)
-DATABASE_URL="postgresql://user:password@localhost:5432/operon"
+DATABASE_URL="postgresql://user:password@localhost:5432/operone"
 
 # NextAuth
 NEXTAUTH_URL="http://localhost:3000"
@@ -123,7 +123,7 @@ pnpm dev
 cd apps/web && pnpm dev
 
 # Desktop app only
-cd apps/operon && pnpm dev
+cd apps/operone && pnpm dev
 ```
 
 ### Production Build
@@ -136,7 +136,7 @@ pnpm build
 cd apps/web && pnpm build
 
 # Build desktop app
-cd apps/operon && pnpm electron:build
+cd apps/operone && pnpm electron:build
 ```
 
 ## 🔐 Authentication Flow
@@ -152,15 +152,15 @@ cd apps/operon && pnpm electron:build
 2. Clicks "Sign In" button
 3. Browser opens to `http://localhost:3000/login?from=desktop`
 4. User completes OAuth authentication
-5. Browser redirects to `operon://auth?token=...`
+5. Browser redirects to `operone://auth?token=...`
 6. Desktop app receives token via deep link
 7. Token stored securely in app
 
 ## 📱 Deep Link Protocol
 
-The desktop app registers the `operon://` protocol handler:
+The desktop app registers the `operone://` protocol handler:
 
-- **Auth callback**: `operon://auth?token=<jwt-token>`
+- **Auth callback**: `operone://auth?token=<jwt-token>`
 - **Platform support**: macOS, Windows, Linux
 
 ## 🎨 UI Design
@@ -211,7 +211,7 @@ pnpm build            # Build for production
 pnpm start            # Start production server
 
 # Desktop App
-cd apps/operon
+cd apps/operone
 pnpm dev              # Start Electron in dev mode
 pnpm electron:build   # Build desktop app
 ```

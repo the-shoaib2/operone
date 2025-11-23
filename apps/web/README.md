@@ -22,7 +22,7 @@ pnpm install
 
 2. **Configure environment** (`.env`):
 ```bash
-DATABASE_URL="postgresql://user:password@localhost:5432/operon"
+DATABASE_URL="postgresql://user:password@localhost:5432/operone"
 NEXTAUTH_URL="http://localhost:3000"
 NEXTAUTH_SECRET="your-secret-here"
 GOOGLE_CLIENT_ID="your-google-client-id"

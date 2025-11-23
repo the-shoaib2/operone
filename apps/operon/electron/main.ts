@@ -31,20 +31,20 @@ function createWindow() {
   })
 }
 
-// Register protocol handler for operon://
+// Register protocol handler for operone://
 function registerProtocolHandler() {
   if (process.defaultApp) {
     if (process.argv.length >= 2) {
-      app.setAsDefaultProtocolClient('operon', process.execPath, [path.resolve(process.argv[1])])
+      app.setAsDefaultProtocolClient('operone', process.execPath, [path.resolve(process.argv[1])])
     }
   } else {
-    app.setAsDefaultProtocolClient('operon')
+    app.setAsDefaultProtocolClient('operone')
   }
 }
 
 // Handle deep links
 function handleDeepLink(url: string) {
-  if (!url.startsWith('operon://')) return
+  if (!url.startsWith('operone://')) return
 
   const urlObj = new URL(url)
   
@@ -83,7 +83,7 @@ app.on('open-url', (event, url) => {
 
 // Handle deep links on Windows/Linux
 if (process.platform === 'win32' || process.platform === 'linux') {
-  const url = process.argv.find(arg => arg.startsWith('operon://'))
+  const url = process.argv.find(arg => arg.startsWith('operone://'))
   if (url) {
     handleDeepLink(url)
   }

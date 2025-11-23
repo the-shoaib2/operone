@@ -5,7 +5,7 @@ An Electron-based desktop application with OAuth authentication via web browser.
 ## Features
 
 - 🔐 Browser-based OAuth authentication
-- 🔗 Deep-link protocol handler (`operon://`)
+- 🔗 Deep-link protocol handler (`operone://`)
 - 💾 Secure token storage
 - 🎨 Modern gradient UI
 - ⚡ Built with Vite + React + TypeScript
@@ -32,7 +32,7 @@ pnpm electron:build
 1. Click "Sign In" button
 2. Browser opens to web app login page
 3. Complete OAuth authentication (Google/GitHub)
-4. Browser redirects to `operon://auth?token=...`
+4. Browser redirects to `operone://auth?token=...`
 5. Desktop app receives token via deep link
 6. Token stored securely and user authenticated
 
