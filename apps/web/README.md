@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/create-next-app).
+# Web App - OAuth Authentication
 
-## Getting Started
+Next.js web application with OAuth authentication (Google, GitHub, Passkey).
 
-First, run the development server:
+## Features
 
+- 🔐 NextAuth v5 (Auth.js)
+- 🎨 Shadcn UI + Tailwind CSS
+- 🗄️ PostgreSQL + Prisma ORM
+- 🔑 OAuth Providers:
+  - Google
+  - GitHub
+  - Passkey (Coming Soon)
+- 🖥️ Desktop app integration via deep links
+
+## Setup
+
+1. **Install dependencies**:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. **Configure environment** (`.env`):
+```bash
+DATABASE_URL="postgresql://user:password@localhost:5432/operon"
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="your-secret-here"
+GOOGLE_CLIENT_ID="your-google-client-id"
+GOOGLE_CLIENT_SECRET="your-google-client-secret"
+GITHUB_CLIENT_ID="your-github-client-id"
+GITHUB_CLIENT_SECRET="your-github-client-secret"
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. **Setup database**:
+```bash
+npx prisma generate
+npx prisma migrate dev --name init
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load Inter, a custom Google Font.
+4. **Start development server**:
+```bash
+pnpm dev
+```
 
-## Learn More
+Visit `http://localhost:3000/login`
 
-To learn more about Next.js, take a look at the following resources:
+## OAuth Setup
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Google OAuth
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create OAuth 2.0 credentials
+3. Add redirect URI: `http://localhost:3000/api/auth/callback/google`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### GitHub OAuth
+1. Go to [GitHub Developer Settings](https://github.com/settings/developers)
+2. Create OAuth App
+3. Set callback URL: `http://localhost:3000/api/auth/callback/github`
 
-## Deploy on Vercel
+## Tech Stack
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Next.js 16
+- NextAuth v5
+- Prisma + PostgreSQL
+- Shadcn UI
+- Tailwind CSS
+- TypeScript

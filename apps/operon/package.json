@@ -1,0 +1,51 @@
+{
+    "name": "operon",
+    "version": "0.1.0",
+    "type": "module",
+    "private": true,
+    "main": "dist-electron/main.js",
+    "scripts": {
+        "dev": "vite",
+        "build": "tsc && vite build && electron-builder",
+        "preview": "vite preview",
+        "electron:dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
+        "electron:build": "vite build && electron-builder",
+        "lint": "eslint . --max-warnings 0",
+        "check-types": "tsc --noEmit"
+    },
+    "dependencies": {
+        "electron-store": "^10.0.0",
+        "react": "^19.2.0",
+        "react-dom": "^19.2.0"
+    },
+    "devDependencies": {
+        "@repo/eslint-config": "workspace:*",
+        "@repo/typescript-config": "workspace:*",
+        "@types/node": "^22.15.3",
+        "@types/react": "19.2.2",
+        "@types/react-dom": "19.2.2",
+        "@vitejs/plugin-react": "^4.3.4",
+        "concurrently": "^9.1.2",
+        "electron": "^34.0.0",
+        "electron-builder": "^26.0.12",
+        "eslint": "^9.39.1",
+        "typescript": "5.9.2",
+        "vite": "^6.0.11",
+        "vite-plugin-electron": "^0.29.0",
+        "vite-plugin-electron-renderer": "^0.14.6",
+        "wait-on": "^8.0.3"
+    },
+    "build": {
+        "appId": "com.operon.app",
+        "productName": "Operon",
+        "mac": {
+            "category": "public.app-category.productivity"
+        },
+        "protocols": {
+            "name": "operon",
+            "schemes": [
+                "operon"
+            ]
+        }
+    }
+}
