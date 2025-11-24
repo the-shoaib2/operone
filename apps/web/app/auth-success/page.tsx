@@ -1,7 +1,10 @@
 import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Image from 'next/image'
-import { CloseButton } from '@/components/close-button';
+import { CloseButton } from '@/components/close-button'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, buttonVariants } from '@repo/ui'
+import { cn } from '@/lib/utils'
+import { CheckCircle2 } from 'lucide-react'
 
 // In-memory token store (shared with validate-token API)
 const tokenStore = new Map<string, { userId: string; expiresAt: number }>()
@@ -48,55 +51,48 @@ export default async function AuthSuccessPage(props: {
         const deepLink = `operone://auth?token=${token}`
 
         return (
-            <div className="min-h-screen flex items-center justify-center bg-background">
-                <div className="text-center space-y-6 p-8 max-w-md">
-                    <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center mx-auto">
-                        <svg
-                            className="w-10 h-10 text-primary-foreground"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                            />
-                        </svg>
-                    </div>
-                    <h1 className="text-3xl font-bold">Authentication Successful!</h1>
-                    <p className="text-muted-foreground">You can now return to the Operone Desktop App</p>
-
-                    <div className="flex flex-col gap-3">
+            <div className="min-h-screen flex items-center justify-center bg-background p-4">
+                <Card className="w-full max-w-md border-none bg-transparent shadow-none">
+                    <CardHeader className="text-center space-y-2">
+                        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+                            <CheckCircle2 className="h-10 w-10 text-primary" />
+                        </div>
+                        <CardTitle className="text-2xl font-bold">Authentication Successful!</CardTitle>
+                        <CardDescription>
+                            You can now return to the Operone Desktop App
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
                         <a
                             href={deepLink}
-                            className="inline-block px-6 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition"
+                            className={cn(buttonVariants({ size: 'lg' }), "w-full")}
                         >
                             Open Operone Desktop
                         </a>
                         <CloseButton />
-                    </div>
+                    </CardContent>
+                    <CardFooter>
+                        <p className="text-xs text-center text-muted-foreground w-full">
+                            Click &quot;Open Operone Desktop&quot; to continue or &quot;Cancel&quot; to stay here
+                        </p>
+                    </CardFooter>
+                </Card>
 
-                    <p className="text-sm text-muted-foreground">
-                        Click &quot;Open Operone Desktop&quot; to continue or &quot;Cancel&quot; to stay here
-                    </p>
-
-                    <script
-                        dangerouslySetInnerHTML={{
-                            __html: `
-                                // Show confirmation dialog after 1 second
-                                setTimeout(() => {
-                                    if (confirm('Open Operone Desktop App?\\n\\nClick OK to open the app, or Cancel to stay on this page.')) {
-                                        window.location.href = '${deepLink}';
-                                    }
-                                }, 1000);
-                            `,
-                        }}
-                    />
-                </div>
+                <script
+                    dangerouslySetInnerHTML={{
+                        __html: `
+                            // Show confirmation dialog after 1 second
+                            setTimeout(() => {
+                                if (confirm('Open Operone Desktop App?\\n\\nClick OK to open the app, or Cancel to stay on this page.')) {
+                                    window.location.href = '${deepLink}';
+                                }
+                            }, 1000);
+                        `,
+                    }}
+                />
             </div>
         )
+
     }
 
     // Otherwise, just redirect to dashboard
