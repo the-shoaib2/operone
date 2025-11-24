@@ -1,18 +1,27 @@
-import { contextBridge as o, ipcRenderer as i } from "electron";
-o.exposeInMainWorld("electronAPI", {
+import { contextBridge, ipcRenderer } from "electron";
+contextBridge.exposeInMainWorld("electronAPI", {
   // AI Chat
-  sendMessage: (e) => i.invoke("ai:sendMessage", e),
+  sendMessage: (message) => ipcRenderer.invoke("ai:sendMessage", message),
   // Memory operations
-  ingestDocument: (e, t, n) => i.invoke("ai:ingestDocument", { id: e, content: t, metadata: n }),
-  queryMemory: (e) => i.invoke("ai:queryMemory", e),
-  getStats: () => i.invoke("ai:getStats"),
+  ingestDocument: (id, content, metadata) => ipcRenderer.invoke("ai:ingestDocument", { id, content, metadata }),
+  queryMemory: (query) => ipcRenderer.invoke("ai:queryMemory", query),
+  getStats: () => ipcRenderer.invoke("ai:getStats"),
   // File operations
-  readFile: (e) => i.invoke("file:read", e),
-  writeFile: (e, t) => i.invoke("file:write", { filePath: e, content: t }),
-  listDirectory: (e) => i.invoke("file:list", e),
+  readFile: (filePath) => ipcRenderer.invoke("file:read", filePath),
+  writeFile: (filePath, content) => ipcRenderer.invoke("file:write", { filePath, content }),
+  listDirectory: (dirPath) => ipcRenderer.invoke("file:list", dirPath),
   // Shell operations
-  executeCommand: (e) => i.invoke("shell:execute", e),
+  executeCommand: (command) => ipcRenderer.invoke("shell:execute", command),
   // Settings
-  getSettings: () => i.invoke("settings:get"),
-  updateSettings: (e) => i.invoke("settings:update", e)
+  getSettings: () => ipcRenderer.invoke("settings:get"),
+  updateSettings: (settings) => ipcRenderer.invoke("settings:update", settings),
+  // Authentication
+  login: () => ipcRenderer.invoke("auth:login"),
+  logout: () => ipcRenderer.invoke("auth:logout"),
+  getUser: () => ipcRenderer.invoke("auth:getUser"),
+  setUser: (user, token) => ipcRenderer.invoke("auth:setUser", { user, token }),
+  onAuthSuccess: (callback) => {
+    ipcRenderer.on("auth-success", callback);
+    return () => ipcRenderer.removeListener("auth-success", callback);
+  }
 });

@@ -8,8 +8,8 @@ interface PasskeyIconProps {
 
 export const PasskeyIcon: React.FC<PasskeyIconProps> = ({
     className = '',
-    width = 24,
-    height = 24
+    width = 30,
+    height = 30
 }) => {
     return (
         <svg

@@ -53,6 +53,12 @@ model Session {
     expires      DateTime
     user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+    // Device and session tracking
+    userAgent    String?
+    ipAddress    String?
+    deviceName   String?
+    lastActivity DateTime @default(now())
+
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 }
@@ -76,6 +82,10 @@ model Authenticator {
     credentialDeviceType String
     credentialBackedUp   Boolean
     transports           String?
+    name                 String? // User-defined name for the passkey
 
     user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }

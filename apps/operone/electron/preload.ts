@@ -24,6 +24,16 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Settings
   getSettings: () => ipcRenderer.invoke('settings:get'),
   updateSettings: (settings: any) => ipcRenderer.invoke('settings:update', settings),
+  
+  // Authentication
+  login: () => ipcRenderer.invoke('auth:login'),
+  logout: () => ipcRenderer.invoke('auth:logout'),
+  getUser: () => ipcRenderer.invoke('auth:getUser'),
+  setUser: (user: any, token: string) => ipcRenderer.invoke('auth:setUser', { user, token }),
+  onAuthSuccess: (callback: (event: any, data: { token: string }) => void) => {
+    ipcRenderer.on('auth-success', callback)
+    return () => ipcRenderer.removeListener('auth-success', callback)
+  },
 })
 
 // Type definitions for TypeScript
@@ -38,6 +48,11 @@ export interface ElectronAPI {
   executeCommand: (command: string) => Promise<{ stdout: string; stderr: string; exitCode: number }>
   getSettings: () => Promise<any>
   updateSettings: (settings: any) => Promise<void>
+  login: () => Promise<void>
+  logout: () => Promise<void>
+  getUser: () => Promise<{ id: string; email: string; name: string; image?: string } | null>
+  setUser: (user: any, token: string) => Promise<void>
+  onAuthSuccess: (callback: (event: any, data: { token: string }) => void) => () => void
 }
 
 declare global {

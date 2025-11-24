@@ -90,8 +90,8 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-background">
-            <Card className="w-full max-w-sm mx-4">
+        <div className="min-h-screen flex items-center justify-center ">
+            <Card className="w-full max-w-sm border-none bg-transparent shadow-none mx-4">
                 <CardHeader className="space-y-1">
                     <CardTitle className="text-2xl font-bold text-center">
                         Welcome to Operone
@@ -171,6 +171,7 @@ export default function LoginPage() {
                         disabled={isPasskeyLoading}
                         className="w-full"
                         size="lg"
+                        variant="secondary"
                     >
                         {isPasskeyLoading ? (
                             <>
@@ -179,7 +180,7 @@ export default function LoginPage() {
                             </>
                         ) : (
                             <>
-                                <PasskeyIcon className="mr-2 h-5 w-5" />
+                                <PasskeyIcon className="mr-2 h-6 w-6" />
                                 Sign in with Passkey
                             </>
                         )}

@@ -1,12 +1,22 @@
 import { app, BrowserWindow, shell, ipcMain } from 'electron'
 import path from 'path'
+import { fileURLToPath } from 'url'
 import Store from 'electron-store'
+
+// ES module compatibility
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 const store = new Store()
 
 let mainWindow: BrowserWindow | null = null
 
 const VITE_DEV_SERVER_URL = process.env.VITE_DEV_SERVER_URL
+
+// Suppress harmless warnings
+app.commandLine.appendSwitch('disable-gpu-sandbox')
+app.commandLine.appendSwitch('disable-software-rasterizer')
+app.commandLine.appendSwitch('disable-dev-shm-usage')
 
 import { OSAgent } from '@repo/ai-engine'
 import { openai } from '@ai-sdk/openai'
@@ -68,26 +78,31 @@ async function initializeAIService() {
 }
 
 function createWindow() {
-  mainWindow = new BrowserWindow({
-    width: 1200,
-    height: 800,
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-      nodeIntegration: false,
-      contextIsolation: true,
-    },
-  })
+  try {
+    mainWindow = new BrowserWindow({
+      width: 1200,
+      height: 800,
+      webPreferences: {
+        preload: path.join(__dirname, 'preload.cjs'),
+        nodeIntegration: false,
+        contextIsolation: true,
+      },
+    })
 
-  if (VITE_DEV_SERVER_URL) {
-    mainWindow.loadURL(VITE_DEV_SERVER_URL)
-    mainWindow.webContents.openDevTools()
-  } else {
-    mainWindow.loadFile(path.join(__dirname, '../dist/index.html'))
+    if (VITE_DEV_SERVER_URL) {
+      mainWindow.loadURL(VITE_DEV_SERVER_URL)
+      mainWindow.webContents.openDevTools()
+    } else {
+      mainWindow.loadFile(path.join(__dirname, '../dist/index.html'))
+    }
+
+    mainWindow.on('closed', () => {
+      mainWindow = null
+    })
+  } catch (error) {
+    console.error('Failed to create window:', error)
+    throw error
   }
-
-  mainWindow.on('closed', () => {
-    mainWindow = null
-  })
 }
 
 // Register protocol handler for operone://
@@ -111,7 +126,9 @@ function handleDeepLink(url: string) {
     const token = urlObj.searchParams.get('token')
     
     if (token && mainWindow) {
+      // Store token temporarily
       store.set('authToken', token)
+      // Notify renderer process
       mainWindow.webContents.send('auth-success', { token })
     }
   }
@@ -148,6 +165,33 @@ function setupIPCHandlers() {
 
   ipcMain.handle('settings:update', async (_event, settings) => {
     store.set('settings', settings)
+    return true
+  })
+
+  // Authentication
+  ipcMain.handle('auth:login', async () => {
+    // Open browser to web app login page with desktop parameter
+    const loginUrl = 'http://localhost:3000/login?from=desktop'
+    shell.openExternal(loginUrl)
+  })
+
+  ipcMain.handle('auth:logout', async () => {
+    // Clear stored authentication data
+    store.delete('authToken')
+    store.delete('user')
+    return true
+  })
+
+  ipcMain.handle('auth:getUser', async () => {
+    // Return stored user data if available
+    const user = store.get('user')
+    return user || null
+  })
+
+  ipcMain.handle('auth:setUser', async (_event, { user, token }) => {
+    // Store user data and token
+    store.set('user', user)
+    store.set('authToken', token)
     return true
   })
 }
