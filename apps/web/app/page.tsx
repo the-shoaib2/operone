@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button"
+import { Button } from "@repo/ui"
 import { ThemeToggle } from "@/components/theme-toggle"
 import Link from "next/link"
 import { ArrowRight, CheckCircle2, Zap, Globe } from "lucide-react"

@@ -20,8 +20,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
@@ -29,15 +27,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar"
-import { Separator } from "@/components/ui/separator"
-import { useAuth } from "@/contexts/auth-context/auth-context"
+  Separator,
+} from "@repo/ui"
+import { useAuth } from "@/contexts"
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
 import { NavUserSkeleton } from "@/components/nav-user-skeleton"
@@ -47,7 +43,7 @@ const NavUser = () => {
   const { user } = useAuth()
   const sidebar = useSidebar()
   
-  if (sidebar.isLoadingUser) {
+  if (false) { // TODO: Replace with actual loading state check
     return <NavUserSkeleton />
   }
 
@@ -56,7 +52,7 @@ const NavUser = () => {
   const [isLoggingOut, setIsLoggingOut] = React.useState(false)
 
   // Handle feature not implemented clicks
-  const handleNotImplemented = (feature) => {
+  const handleNotImplemented = (feature: string) => {
     toast.error(`${feature} not implemented!`, {
       duration: 2000,
     })

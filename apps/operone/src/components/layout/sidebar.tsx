@@ -1,8 +1,8 @@
 import { MessageSquare, Settings, Database, Plus, LogOut } from 'lucide-react'
-import { Button } from '../ui/button'
+import { Button } from '@repo/ui'
 import { cn } from '@/lib/utils'
-import type { View } from '../../types'
-import { useAuth } from '../../contexts/auth-context'
+import type { View } from '@/types'
+import { useAuth } from '@/contexts/auth-context'
 
 interface SidebarProps {
     className?: string

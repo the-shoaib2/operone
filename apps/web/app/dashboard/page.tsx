@@ -1,6 +1,6 @@
 import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui'
 import { PasskeyIcon } from '@/components/icons/passkey'
 import { ProfileCard } from '@/components/profile-card'
 import { PasskeyManagement } from '@/components/passkey-management'

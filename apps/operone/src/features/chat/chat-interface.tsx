@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect } from 'react'
 import { Send, Sparkles, User } from 'lucide-react'
-import { Button } from '../../components/ui/button'
-import { Input } from '../../components/ui/input' // Keep using Input for now, or switch to Textarea
+import { Button } from '@repo/ui'
+import { Input } from '@repo/ui'
 import { cn } from '@/lib/utils'
 import type { Message } from '../../types'
-import { DashboardLayout } from '../../components/dashboard/dashboard-layout'
-import { ScrollArea } from '../../components/ui/scroll-area'
+import { DashboardLayout } from '@/components/dashboard/dashboard-layout'
+import { ScrollArea } from '@repo/ui'
 
 export function ChatInterface() {
     const [messages, setMessages] = useState<Message[]>([])

@@ -1,5 +1,5 @@
 import { Sidebar } from './sidebar'
-import type { View } from '../../types'
+import type { View } from '@/types'
 
 interface LayoutProps {
     children: React.ReactNode

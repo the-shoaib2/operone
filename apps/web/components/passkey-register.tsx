@@ -2,8 +2,7 @@
 
 import { useState } from 'react'
 import { startRegistration } from '@simplewebauthn/browser'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
+import { Button, Card, CardContent } from '@repo/ui'
 import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 import Image from 'next/image'

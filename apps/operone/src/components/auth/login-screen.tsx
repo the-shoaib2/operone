@@ -1,6 +1,5 @@
 import { useAuth } from '../../contexts/auth-context'
-import { Button } from '../ui/button'
-import { Card, CardContent } from '../ui/card'
+import { Button, Card, CardContent } from '@repo/ui'
 import { Loader2, Shield } from 'lucide-react'
 import faviconUrl from '../../assets/favicon.ico'
 

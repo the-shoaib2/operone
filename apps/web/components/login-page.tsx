@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { startAuthentication } from '@simplewebauthn/browser'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 import Image from 'next/image'
