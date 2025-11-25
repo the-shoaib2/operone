@@ -73,8 +73,7 @@ export const ChatPromptInput = React.memo(function ChatPromptInput({
             <Send className="h-4 w-4" />
             <span className="sr-only">Send message</span>
           </PromptInputButton>
-        </PromptInputTools>
-        <PromptInputSelect
+          <PromptInputSelect
             value={selectedModel}
             onValueChange={setSelectedModel}
             disabled={isLoading}
