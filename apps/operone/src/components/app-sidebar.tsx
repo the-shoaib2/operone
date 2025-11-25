@@ -1,6 +1,6 @@
 import * as React from "react"
-import { Command, MessageSquare, FolderOpen, ChevronRight, ChevronDown, Plus } from "lucide-react"
-import { Link, useLocation } from "react-router-dom"
+import { Command, MessageSquare, FolderOpen, ChevronRight, ChevronDown, Plus, Trash2 } from "lucide-react"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 
 import { NavMain } from "@/components/nav-main"
 import { NavProjects } from "@/components/nav-projects"
@@ -23,16 +23,19 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { useAuth } from "@/contexts"
+import { useChat } from "@/contexts/chat-context"
 import { commonNavItems, quickActions, conversations, projects, truncateText } from "@/components/app-navigation"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useAuth()
   const location = useLocation()
+  const navigate = useNavigate()
+  const { chats, currentChatId, createNewChat, deleteChat, switchToChat } = useChat()
   
   // Optimized data structure like ChatGPT
   const [expandedSections, setExpandedSections] = React.useState({
-    chats: false,
-    projects: true
+    chats: true,
+    projects: false
   })
 
   const toggleSection = (section: 'chats' | 'projects') => {
@@ -138,7 +141,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             >
               <span className="flex items-center gap-2">
                 <MessageSquare className="w-4 h-4" />
-                Chats
+                Chats ({chats.length})
               </span>
               {expandedSections.chats ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
             </SidebarMenuButton>
@@ -147,17 +150,43 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarGroupContent>
               <div className="max-h-64 overflow-y-auto">
                 <SidebarMenu>
-                  {conversations.map((conversation) => (
-                    <SidebarMenuItem key={conversation.id}>
-                      <SidebarMenuButton asChild>
-                        <Link to={conversation.url} className="flex items-center justify-between w-full">
+                  {/* Create New Chat */}
+                  <SidebarMenuItem>
+                    <SidebarMenuButton 
+                      onClick={() => {
+                        const newChatId = createNewChat()
+                        navigate(`/dashboard/chat/${newChatId}`)
+                      }}
+                      className="text-sidebar-foreground/70"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>New chat</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  
+                  {/* Chat List */}
+                  {chats.map((chat) => (
+                    <SidebarMenuItem key={chat.id}>
+                      <SidebarMenuButton asChild className={currentChatId === chat.id ? "bg-accent" : ""}>
+                        <Link to={`/dashboard/chat/${chat.id}`} className="flex items-center justify-between w-full group">
                           <div className="flex items-center gap-2 min-w-0 flex-1">
                             <MessageSquare className="w-4 h-4 flex-shrink-0" />
-                            <span className="truncate">{truncateText(conversation.title, 20)}</span>
+                            <span className="truncate">{chat.title}</span>
                           </div>
-                          {conversation.date && (
-                            <span className="text-xs text-muted-foreground flex-shrink-0 ml-2">{conversation.date}</span>
-                          )}
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                if (confirm('Delete this chat?')) {
+                                  deleteChat(chat.id)
+                                }
+                              }}
+                              className="p-1 hover:bg-destructive hover:text-destructive-foreground rounded"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </div>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>

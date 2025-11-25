@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Suspense, lazy } from 'react'
 import { AuthProvider, useAuth } from './contexts/auth-context'
 import { AIProvider } from './contexts/ai-context'
+import { ChatProvider } from './contexts/chat-context'
 import { ModelDetectorProvider } from './contexts'
 import { LoginScreen } from './components/auth/login-screen'
 import { AppLayout } from './components/layout/app-layout'
@@ -48,23 +49,26 @@ function AppContent() {
 
     // Show main app if authenticated
     return (
-        <AppLayout>
-            <ModelDetectorProvider>
-                <Suspense fallback={<LoadingSpinner />}>
-                    <Routes>
-                    <Route path="/dashboard/chat" element={<ChatInterface />} />
-                    <Route path="/dashboard/memory" element={<MemoryInspector />} />
-                    <Route path="/settings/account" element={<SettingsPanel />} />
-                    <Route path="/settings/billing" element={<SettingsPanel />} />
-                    <Route path="/settings/notifications" element={<SettingsPanel />} />
-                    <Route path="/settings/models/add" element={<AddModelPage />} />
-                    <Route path="/settings" element={<Navigate to="/settings/account" replace />} />
-                    <Route path="/" element={<Navigate to="/dashboard/chat" replace />} />
-                    <Route path="/dashboard" element={<Navigate to="/dashboard/chat" replace />} />
-                </Routes>
-            </Suspense>
-        </ModelDetectorProvider>
-    </AppLayout>
+        <ChatProvider>
+            <AppLayout>
+                <ModelDetectorProvider>
+                    <Suspense fallback={<LoadingSpinner />}>
+                        <Routes>
+                        <Route path="/dashboard/chat" element={<ChatInterface />} />
+                        <Route path="/dashboard/chat/:chatId" element={<ChatInterface />} />
+                        <Route path="/dashboard/memory" element={<MemoryInspector />} />
+                        <Route path="/settings/account" element={<SettingsPanel />} />
+                        <Route path="/settings/billing" element={<SettingsPanel />} />
+                        <Route path="/settings/notifications" element={<SettingsPanel />} />
+                        <Route path="/settings/models/add" element={<AddModelPage />} />
+                        <Route path="/settings" element={<Navigate to="/settings/account" replace />} />
+                        <Route path="/" element={<Navigate to="/dashboard/chat" replace />} />
+                        <Route path="/dashboard" element={<Navigate to="/dashboard/chat" replace />} />
+                    </Routes>
+                </Suspense>
+            </ModelDetectorProvider>
+        </AppLayout>
+        </ChatProvider>
     )
 }
 
