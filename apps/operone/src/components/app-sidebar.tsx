@@ -33,8 +33,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { 
     projects, 
     chats, 
-    currentProject, 
-    currentChat,
     createChat,
     setCurrentChat,
     setCurrentProject 

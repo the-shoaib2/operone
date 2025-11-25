@@ -48,8 +48,6 @@ export const ChatLayout = React.memo(function ChatLayout({
   } = useProject();
   
   const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
-  const chatId = searchParams.get('chatId');
   
   const [input, setInput] = useState("");
   const [selectedModel, setSelectedModel] = useState("");

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Plus, MessageSquare, FolderOpen, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -15,7 +15,6 @@ export function ProjectDetail() {
     getProjectChats, 
     createChat, 
     setCurrentChat,
-    currentProject,
     setCurrentProject 
   } = useProject();
   
