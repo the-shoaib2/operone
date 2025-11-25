@@ -1,6 +1,6 @@
 import * as React from "react"
 import { useCallback, useMemo } from "react"
-import { Loader2, ArrowUp, Paperclip, Mic } from "lucide-react"
+import { Loader2, ArrowUp, Mic } from "lucide-react"
 
 import {
   PromptInput,
