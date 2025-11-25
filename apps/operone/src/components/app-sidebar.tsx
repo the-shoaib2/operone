@@ -91,7 +91,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <div className="flex items-center gap-2">
               <div className="relative group flex-1">
                 <SidebarMenuButton size="lg" asChild className="flex-1">
-                  <Link to="/dashboard/overview">
+                  <Link to="/dashboard/chat">
                     <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                       <Command className="size-4" />
                     </div>

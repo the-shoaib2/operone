@@ -52,7 +52,6 @@ function AppContent() {
             <ModelDetectorProvider>
                 <Suspense fallback={<LoadingSpinner />}>
                     <Routes>
-                    <Route path="/dashboard/overview" element={<ChatInterface />} />
                     <Route path="/dashboard/chat" element={<ChatInterface />} />
                     <Route path="/dashboard/memory" element={<MemoryInspector />} />
                     <Route path="/settings/account" element={<SettingsPanel />} />
@@ -60,8 +59,8 @@ function AppContent() {
                     <Route path="/settings/notifications" element={<SettingsPanel />} />
                     <Route path="/settings/models/add" element={<AddModelPage />} />
                     <Route path="/settings" element={<Navigate to="/settings/account" replace />} />
-                    <Route path="/" element={<Navigate to="/dashboard/overview" replace />} />
-                    <Route path="/dashboard" element={<Navigate to="/dashboard/overview" replace />} />
+                    <Route path="/" element={<Navigate to="/dashboard/chat" replace />} />
+                    <Route path="/dashboard" element={<Navigate to="/dashboard/chat" replace />} />
                 </Routes>
             </Suspense>
         </ModelDetectorProvider>

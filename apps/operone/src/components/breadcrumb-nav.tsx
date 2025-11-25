@@ -13,7 +13,6 @@ import {
 // Route to breadcrumb label mapping
 const routeLabels: Record<string, string> = {
     dashboard: "Dashboard",
-    overview: "Overview",
     chat: "Chat",
     memory: "Memory",
     analytics: "Analytics",

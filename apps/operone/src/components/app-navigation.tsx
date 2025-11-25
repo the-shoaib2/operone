@@ -21,13 +21,13 @@ export const getNavItems = (role: string) => {
   const baseItems = [
     {
       title: "Dashboard",
-      url: "/dashboard/overview",
+      url: "/dashboard/chat",
       icon: Activity,
       isActive: true,
       items: [
-        { title: "Overview", url: "/dashboard/overview" },
-        { title: "Analytics", url: "/dashboard/analytics" },
-        { title: "Notifications", url: "/dashboard/notifications" }
+        { title: "Chat", url: "/dashboard/chat" },
+        { title: "Memory", url: "/dashboard/memory" },
+        { title: "Settings", url: "/settings/account" }
       ]
     }
   ]
