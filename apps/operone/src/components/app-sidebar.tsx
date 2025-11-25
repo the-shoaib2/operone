@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Command, MessageSquare, FolderOpen, ChevronRight, ChevronDown } from "lucide-react"
+import { Command, MessageSquare, FolderOpen, ChevronRight, ChevronDown, Plus } from "lucide-react"
 import { Link, useLocation } from "react-router-dom"
 
 import { NavMain } from "@/components/nav-main"
@@ -189,7 +189,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild className="text-sidebar-foreground/70">
                     <Link to="/project/new" className="flex items-center gap-2">
-                      <FolderOpen className="w-4 h-4" />
+                      <Plus className="w-4 h-4" />
                       <span>New project</span>
                     </Link>
                   </SidebarMenuButton>
