@@ -32,7 +32,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // Optimized data structure like ChatGPT
   const [expandedSections, setExpandedSections] = React.useState({
     chats: false,
-    projects: false
+    projects: true
   })
 
   const toggleSection = (section: 'chats' | 'projects') => {
@@ -221,7 +221,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           )}
         </SidebarGroup>
 
-        <NavProjects projects={sidebarData.projects} />
+        {/* <NavProjects projects={sidebarData.projects} /> */}
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={sidebarData.user} />
