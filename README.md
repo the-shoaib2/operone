@@ -70,7 +70,7 @@ operone/
 ### 1. Clone & Install
 
 ```bash
-git clone (https://github.com/the-shoaib2/operone.git)
+git clone https://github.com/the-shoaib2/operone.git
 cd operone
 pnpm install
 ```
