@@ -29,14 +29,14 @@ export class OSAgent {
 
   /**
    * Execute an OS command (simulated for now)
-   * In a real implementation, this would use child_process or similar
+   * In a real implementation, this would use @operone/shell or similar
    */
   async execute(command: string): Promise<string> {
     try {
-      // For now, just return a simulation
-      // In production, this would actually execute system commands with proper safety checks
       this.eventBus.publish('agent', 'os-command', { command });
       
+      // Simulated execution - in production this would use @operone/shell
+      // or be executed via IPC in the Electron main process
       return `Simulated execution of command: ${command}`;
     } catch (error) {
       console.error('Error executing command:', error);

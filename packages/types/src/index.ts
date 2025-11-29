@@ -110,6 +110,23 @@ export interface ExactTextResult {
 
 export type MessageType = 'text' | 'image' | 'exact-text' | 'mixed';
 
+export interface ToolCall {
+  id: string;
+  type: string;
+  state: 'input-streaming' | 'input-available' | 'approval-requested' | 'approval-responded' | 'output-available' | 'output-error' | 'output-denied';
+  input?: any;
+  output?: any;
+  errorText?: string;
+}
+
+export interface Artifact {
+  id: string;
+  type: string;
+  title: string;
+  content: string;
+  language?: string;
+}
+
 export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant' | 'system';
@@ -118,6 +135,10 @@ export interface ChatMessage {
   type?: MessageType;
   images?: GeneratedImage[];
   exactText?: ExactTextResult;
+  // Enhanced fields for rich content
+  toolCalls?: ToolCall[];
+  artifacts?: Artifact[];
+  metadata?: Record<string, any>;
 }
 
 export interface AIServiceConfig {

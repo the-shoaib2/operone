@@ -13,7 +13,7 @@ test('validate-token api requires token', async ({ request }) => {
   });
   expect(response.status()).toBe(400);
   const body = await response.json();
-  expect(body.error).toBe('Token is required');
+  expect(body.error).toBe('Invalid input');
 });
 
 test('validate-token api rejects invalid token', async ({ request }) => {

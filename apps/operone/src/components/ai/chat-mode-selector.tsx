@@ -1,14 +1,14 @@
-import { Brain, Zap, Target } from 'lucide-react';
+import { Brain, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
 } from "@/components/ui/select";
 import { memo, useEffect, useState } from 'react';
 
-export type ChatMode = 'chat' | 'agentic' | 'planning';
+export type ChatMode = 'chat' | 'planning';
 
 // Optimized mode configuration with memoized icons
 const modes = [
@@ -19,16 +19,10 @@ const modes = [
         color: 'text-blue-500',
     },
     {
-        id: 'agentic' as const,
-        label: 'Agentic',
-        icon: Brain,
-        color: 'text-purple-500',
-    },
-    {
         id: 'planning' as const,
         label: 'Planning',
-        icon: Target,
-        color: 'text-green-500',
+        icon: Brain,
+        color: 'text-purple-500',
     },
 ] as const;
 
@@ -46,8 +40,8 @@ export const ChatModeSelector = memo(function ChatModeSelector({ mode, onModeCha
                 const isActive = mode === m.id;
                 const iconColor = isActive ? 'text-destructive-foreground' : 'text-muted-foreground';
                 const textColor = isActive ? 'text-destructive-foreground' : 'text-muted-foreground';
-                const buttonClass = isActive 
-                    ? 'bg-destructive text-destructive-foreground' 
+                const buttonClass = isActive
+                    ? 'bg-destructive text-destructive-foreground'
                     : 'hover:bg-background/80';
 
                 return (
@@ -93,8 +87,8 @@ export const ChatModeDropdown = memo(function ChatModeDropdown({
     const [mode, setMode] = useState<ChatMode>(() => {
         if (typeof window !== 'undefined') {
             const saved = localStorage.getItem('chat-mode');
-            if (saved && (saved === 'chat' || saved === 'agentic' || saved === 'planning')) {
-                return saved;
+            if (saved && (saved === 'chat' || saved === 'planning')) {
+                return saved as ChatMode;
             }
         }
         return propMode;
@@ -140,9 +134,9 @@ export const ChatModeDropdown = memo(function ChatModeDropdown({
                 }}
             >
                 {modes.map((modeInfo) => (
-                    <SelectItem 
-                        key={modeInfo.id} 
-                        value={modeInfo.id} 
+                    <SelectItem
+                        key={modeInfo.id}
+                        value={modeInfo.id}
                         className="px-1.5 py-0.5 data-[state=checked]:bg-muted"
                     >
                         <div className="flex items-center gap-1.5">

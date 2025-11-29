@@ -69,9 +69,9 @@ export default function AuthSuccessPage(props: {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center p-4">
-                <Card className="w-full max-w-sm">
-                    <CardContent className="flex flex-col items-center justify-center py-12 space-y-4">
+            <div className="min-h-[50vh] flex items-center justify-center p-4">
+                <Card className="w-full border-none shadow-none bg-transparent max-w-sm">
+                    <CardContent className="flex flex-col items-center justify-center py-8 space-y-4">
                         <div className="animate-spin rounded-full h-8 w-8 border-2 border-green-600 border-t-transparent"></div>
                         <div className="text-center space-y-2">
                             <h3 className="text-lg font-semibold">Preparing Authentication</h3>

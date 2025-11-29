@@ -148,9 +148,14 @@ function handleDeepLink(url: string) {
 // IPC Handlers
 function setupIPCHandlers() {
   // Legacy AI Chat (for backward compatibility)
-  ipcMain.handle('ai:sendMessage', async (_event, message: string) => {
+  ipcMain.handle('ai:sendMessage', async (_event, message: string, mode: 'chat' | 'planning' = 'chat') => {
     const service = getOrCreateAIService()
-    return await service.sendMessage(message)
+    return await service.sendMessage(message, mode)
+  })
+
+  ipcMain.handle('ai:sendMessageStreaming', async (_event, message: string, mode: 'chat' | 'planning' = 'chat') => {
+    const service = getOrCreateAIService()
+    return await service.sendMessageStreaming(message, mode)
   })
 
   // Memory operations

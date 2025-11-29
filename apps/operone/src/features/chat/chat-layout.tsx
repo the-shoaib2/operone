@@ -38,6 +38,26 @@ export const ChatContent = ({ children, className }: ChatContentProps) => (
   </div>
 );
 
+export interface ChatPanelProps {
+  children: ReactNode;
+  className?: string;
+  isOpen?: boolean;
+  width?: string;
+}
+
+export const ChatPanel = ({ children, className, isOpen = false, width = "400px" }: ChatPanelProps) => {
+  if (!isOpen) return null;
+
+  return (
+    <div
+      className={cn("border-l bg-background hidden md:flex flex-col h-full transition-all duration-300 ease-in-out", className)}
+      style={{ width }}
+    >
+      {children}
+    </div>
+  );
+};
+
 export interface ChatMessagesProps {
   children: ReactNode;
   className?: string;
@@ -60,7 +80,7 @@ export interface ChatMessagesContainerProps {
 }
 
 export const ChatMessagesContainer = ({ children, className }: ChatMessagesContainerProps) => (
-  <div className={cn("max-w-none md:max-w-3xl lg:max-w-4xl mx-auto px-2 py-3 sm:px-3", className)}>
+  <div className={cn("max-w-[600px] mx-auto px-2 py-3 sm:px-3", className)}>
     <div className="space-y-4">
       {children}
     </div>
@@ -74,7 +94,7 @@ export interface ChatInputContainerProps {
 
 export const ChatInputContainer = ({ children, className }: ChatInputContainerProps) => (
   <div className={cn("flex-shrink-0 bg-background border-t", className)}>
-    <div className="max-w-none md:max-w-3xl lg:max-w-4xl mx-auto p-2 sm:p-3">
+    <div className="max-w-[600px] mx-auto p-2 sm:p-3">
       {children}
     </div>
   </div>

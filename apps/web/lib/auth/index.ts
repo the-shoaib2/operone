@@ -68,34 +68,58 @@ const nextAuth = NextAuth({
     }),
   ],
   adapter: PrismaAdapter(prisma) as Adapter,
-  session: { strategy: 'jwt' },
+  session: { 
+    strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+    updateAge: 24 * 60 * 60, // 24 hours
+  },
   callbacks: {
     ...authConfig.callbacks,
-    async jwt({ token, user }) {
+    async jwt({ token, user, account, trigger }) {
+      // Initial sign in
       if (user) {
         token.id = user.id
+        token.email = user.email
+        token.name = user.name
+        token.picture = user.image
       }
+
+      // Add account provider info
+      if (account) {
+        token.provider = account.provider
+      }
+
+      // Handle token refresh
+      if (trigger === 'update') {
+        // You can update token data here if needed
+      }
+
       return token
     },
+    
     async session({ session, token }) {
       if (token && session.user) {
         session.user.id = token.id as string
+        session.user.email = token.email as string
+        session.user.name = token.name as string
+        session.user.image = token.picture as string
       }
       return session
     },
   },
   events: {
-    async signIn({ user }) {
+    async signIn({ user, account, isNewUser }) {
       if (!user.email) return
 
       try {
         const { headers } = await import('next/headers')
         const headersList = await headers()
-        const ip = headersList.get('x-forwarded-for') || 'Unknown IP'
+        const ip = headersList.get('x-forwarded-for')?.split(',')[0]?.trim() || 
+                   headersList.get('x-real-ip') || 
+                   'Unknown IP'
         const userAgent = headersList.get('user-agent') || 'Unknown Device'
         
-        // Simple heuristic to detect Electron app if we add a custom UA later
-        // or just rely on the user agent string containing 'Electron' if standard
+        // Detect platform
         const isElectron = userAgent.includes('Electron') || userAgent.includes('OperonDesktop')
         const platform = isElectron ? 'Operon Desktop App' : 'Web Browser'
 
@@ -109,8 +133,38 @@ const nextAuth = NextAuth({
           userAgent,
           platform
         })
+
+        // Log to console in development
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`✅ Sign in: ${user.email} (${account?.provider || 'unknown'}) - ${isNewUser ? 'New User' : 'Existing User'}`)
+        }
       } catch (error) {
         console.error('Error sending login notification:', error)
+      }
+    },
+
+    async signOut() {
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`👋 Sign out event triggered`)
+      }
+    },
+
+    async createUser({ user }) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`🆕 New user created: ${user.email}`)
+      }
+    },
+
+    async updateUser({ user }) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`📝 User updated: ${user.email}`)
+      }
+    },
+
+    async session({ session }) {
+      // Track session activity
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`🔄 Session accessed: ${session.user?.email || 'Unknown'}`)
       }
     },
   },
@@ -120,3 +174,4 @@ export const handlers = nextAuth.handlers
 export const signIn = nextAuth.signIn as any
 export const signOut = nextAuth.signOut
 export const auth = nextAuth.auth as any
+

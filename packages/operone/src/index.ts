@@ -1,5 +1,7 @@
 // Core exports
 export { MemoryManager } from './memory/MemoryManager';
+export * from './core/tool-registry';
+export * from './core/tool-executor';
 export { ModelProvider, ModelRegistry, ProviderManager, createDefaultConfig } from './model-provider';
 export { StreamHandler } from './streaming/StreamHandler';
 export type { StreamOptions } from './streaming/StreamHandler';

@@ -9,6 +9,33 @@ import autoprefixer from 'autoprefixer'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
+// Custom plugin to rewrite CommonJS imports to default imports
+function rewriteCommonJSImports() {
+  return {
+    name: 'rewrite-commonjs-imports',
+    generateBundle(_options, bundle) {
+      for (const fileName in bundle) {
+        const chunk = bundle[fileName]
+        if (chunk.type === 'chunk' && chunk.code) {
+          // Rewrite electron imports - use default export
+          chunk.code = chunk.code.replace(
+            /import\s*{([^}]+)}\s*from\s*["']electron["']/g,
+            (match, imports) => {
+              const importList = imports.split(',').map(i => i.trim()).join(', ')
+              return `import * as __electron from "electron";\nconst { ${importList} } = __electron.default`
+            }
+          )
+          // Rewrite electron-store imports
+          chunk.code = chunk.code.replace(
+            /import\s+(\w+)\s+from\s+["']electron-store["']/g,
+            'import * as __electronStore from "electron-store";\nconst $1 = __electronStore.default || __electronStore'
+          )
+        }
+      }
+    }
+  }
+}
+
 export default defineConfig({
   plugins: [
     react(),
@@ -23,6 +50,7 @@ export default defineConfig({
               output: {
                 format: 'es',
               },
+              plugins: [rewriteCommonJSImports()],
             },
           },
         },

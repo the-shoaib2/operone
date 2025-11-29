@@ -7,7 +7,8 @@ export type ReasoningStep = {
   type: 'think' | 'act' | 'observe';
   content: string;
   timestamp: number;
-  status?: 'completed' | 'in-progress' | 'pending';
+  status?: 'completed' | 'in-progress' | 'pending' | 'failed';
+  metadata?: any;
 };
 
 interface ReasoningStepsDisplayProps {
@@ -58,7 +59,7 @@ export function ReasoningStepsDisplay({ steps, className }: ReasoningStepsDispla
   return (
     <div className={cn('border rounded-lg bg-background', className)}>
       {/* Header */}
-      <div 
+      <div
         className="flex items-center justify-between p-3 cursor-pointer hover:bg-muted/50 transition-colors"
         onClick={() => setIsExpanded(!isExpanded)}
       >
@@ -119,7 +120,8 @@ export function ReasoningStepsDisplay({ steps, className }: ReasoningStepsDispla
                         'text-xs px-1.5 py-0.5 rounded',
                         step.status === 'completed' && 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
                         step.status === 'in-progress' && 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-                        step.status === 'pending' && 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
+                        step.status === 'pending' && 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400',
+                        step.status === 'failed' && 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
                       )}>
                         {step.status}
                       </span>
@@ -160,7 +162,7 @@ export function ReasoningStepsCompact({ steps, className, maxSteps = 3 }: Reason
       {displaySteps.map((step, index) => {
         const config = stepConfig[step.type];
         const Icon = config.icon;
-        
+
         return (
           <div key={index} className="flex items-center gap-1">
             <Icon className={cn('h-3 w-3', config.color)} />

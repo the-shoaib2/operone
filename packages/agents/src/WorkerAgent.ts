@@ -1,5 +1,4 @@
 import { Agent, AgentConfig } from './Agent';
-import { TaskNode } from '@operone/thinking';
 
 export class WorkerAgent extends Agent {
   constructor(config: AgentConfig) {
@@ -19,15 +18,14 @@ export class WorkerAgent extends Agent {
     });
 
     // 2. Plan the task
-    // In a real scenario, we'd use the AI to generate the plan
-    // For now, we'll simulate a simple plan
     const planId = `plan-${Date.now()}`;
-    const rootNode: TaskNode = {
+    
+    // Add task to planner (simplified without TaskNode)
+    this.planner.addTask({
       id: planId,
       description: task,
       status: 'pending'
-    };
-    this.planner.addTask(rootNode);
+    } as any);
 
     // 3. Execute (simulated)
     try {

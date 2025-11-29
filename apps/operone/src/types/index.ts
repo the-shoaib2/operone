@@ -43,7 +43,8 @@ export interface ElectronAPI {
   
   // AI Provider methods
   ai: {
-    sendMessage: (message: string) => Promise<string>
+    sendMessage: (message: string, mode?: 'chat' | 'planning') => Promise<string>
+    sendMessageStreaming: (message: string, mode?: 'chat' | 'planning') => Promise<void>
     getActiveProvider: () => Promise<any>
     getAllProviders: () => Promise<Record<string, any>>
     setActiveProvider: (id: string) => Promise<boolean>
@@ -51,6 +52,13 @@ export interface ElectronAPI {
     removeProvider: (id: string) => Promise<boolean>
     updateProvider: (id: string, config: any) => Promise<void>
     testProvider: (id: string) => Promise<{ success: boolean; error?: string }>
+    getModels: (providerType: string) => Promise<any[]>
+    
+    // Streaming & Events
+    onStreamToken: (callback: (token: string) => void) => () => void
+    onStreamComplete: (callback: (fullText: string) => void) => () => void
+    onStreamError: (callback: (error: string) => void) => () => void
+    onAgentEvent: (callback: (payload: any) => void) => () => void
   }
 }
 

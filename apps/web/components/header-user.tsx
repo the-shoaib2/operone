@@ -54,7 +54,13 @@ export function HeaderUser({
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            {user.image && <AvatarImage src={user.image} alt={user.name} />}
+            {user.image && (
+              <AvatarImage 
+                src={user.image} 
+                alt={user.name}
+                referrerPolicy="no-referrer"
+              />
+            )}
             <AvatarFallback>
               {user.name.charAt(0) || "U"}
             </AvatarFallback>

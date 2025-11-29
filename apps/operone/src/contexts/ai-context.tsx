@@ -4,12 +4,14 @@ import { BrowserAdapter } from '@repo/operone';
 
 const { BrowserAIService } = BrowserAdapter;
 
+export type ChatMode = 'chat' | 'planning';
+
 interface AIContextType {
     // Chat
     messages: ChatMessage[];
     setMessages: (messages: ChatMessage[] | ((prev: ChatMessage[]) => ChatMessage[])) => void;
-    sendMessage: (content: string) => Promise<void>;
-    sendMessageStreaming: (content: string) => Promise<void>;
+    sendMessage: (content: string, mode?: ChatMode) => Promise<void>;
+    sendMessageStreaming: (content: string, mode?: ChatMode) => Promise<void>;
     sendMessageWithMode: (content: string, mode: MessageType) => Promise<void>;
     isLoading: boolean;
     streamingMessage: string | null;
@@ -90,7 +92,7 @@ export function AIProvider({ children }: { children: ReactNode }) {
         }
     };
 
-    const sendMessage = async (content: string) => {
+    const sendMessage = async (content: string, mode: ChatMode = 'chat') => {
         // Check if electronAPI is available
         if (!window.electronAPI || !window.electronAPI.ai) {
             // Try browser AI service
@@ -166,7 +168,7 @@ export function AIProvider({ children }: { children: ReactNode }) {
         setIsLoading(true);
 
         try {
-            const response = await window.electronAPI.ai.sendMessage(content);
+            const response = await window.electronAPI.ai.sendMessage(content, mode);
 
             const aiMessage: ChatMessage = {
                 id: (Date.now() + 1).toString(),
@@ -192,7 +194,7 @@ export function AIProvider({ children }: { children: ReactNode }) {
         }
     };
 
-    const sendMessageStreaming = async (content: string) => {
+    const sendMessageStreaming = async (content: string, mode: ChatMode = 'chat') => {
         // Check if electronAPI is available
         if (!window.electronAPI || !window.electronAPI.ai) {
             // Try browser AI service with streaming
@@ -353,7 +355,7 @@ export function AIProvider({ children }: { children: ReactNode }) {
             cleanupFunctions.push(window.electronAPI.ai.onStreamError(onError));
 
             // Start streaming
-            await window.electronAPI.ai.sendMessageStreaming(content, currentMode);
+            await window.electronAPI.ai.sendMessageStreaming(content, mode);
         } catch (error) {
             console.error('Failed to send streaming message:', error);
 
@@ -509,7 +511,7 @@ export function AIProvider({ children }: { children: ReactNode }) {
         testProvider,
         getAvailableModels,
         currentMode,
-        sendMessageWithMode: sendMessage, // Placeholder for now
+        sendMessageWithMode: (content, mode) => sendMessage(content, 'chat'), // Placeholder
     };
 
     return <AIContext.Provider value={value}>{children}</AIContext.Provider>;

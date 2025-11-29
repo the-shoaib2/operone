@@ -47,7 +47,7 @@ export function NavUser({
   const { logout } = useAuth()
   const [isLoggingOut, setIsLoggingOut] = useState(false)
 
-  console.log('NavUser user prop:', user)
+  // console.log('NavUser user prop:', user)
 
   const handleLogout = async () => {
     setIsLoggingOut(true)

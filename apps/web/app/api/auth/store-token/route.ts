@@ -8,20 +8,45 @@ function generateToken(): string {
     return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('')
 }
 
+import { z } from 'zod'
+import { storeTokenSchema } from '@/lib/validations/auth'
+import { rateLimiter, RATE_LIMITS } from '@/lib/security/rate-limiter'
+import { securityLogger, SecurityEventType, LogLevel } from '@/lib/security/logger'
+
 export async function POST(request: NextRequest) {
     try {
-        const { token, userId } = await request.json()
-
-        if (!token || !userId) {
+        // Rate limiting
+        const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
+                   request.headers.get('x-real-ip') || 
+                   'unknown'
+        
+        const rateLimit = rateLimiter.check(`${ip}:store-token`, RATE_LIMITS.auth)
+        
+        if (!rateLimit.allowed) {
+            securityLogger.logRateLimitExceeded(`${ip}:store-token`, '/api/auth/store-token', ip)
             return NextResponse.json(
-                { error: 'Token and userId are required' },
+                { error: 'Too many requests' },
+                { status: 429 }
+            )
+        }
+
+        const body = await request.json()
+        
+        // Validation
+        const result = storeTokenSchema.safeParse(body)
+        if (!result.success) {
+            return NextResponse.json(
+                { error: 'Invalid input', details: result.error.flatten() },
                 { status: 400 }
             )
         }
 
+        const { token, userId } = result.data
+
         // Verify user is authenticated
         const session = await auth()
         if (!session?.user || session.user.id !== userId) {
+            securityLogger.logUnauthorizedAccess('/api/auth/store-token', ip, userId)
             return NextResponse.json(
                 { error: 'Unauthorized' },
                 { status: 401 }
@@ -39,6 +64,15 @@ export async function POST(request: NextRequest) {
                 userId,
                 expires: expiresAt
             }
+        })
+
+        securityLogger.log({
+            type: SecurityEventType.AUTH_SUCCESS,
+            level: LogLevel.INFO,
+            message: 'Desktop auth token stored',
+            userId,
+            ip,
+            path: '/api/auth/store-token'
         })
 
         return NextResponse.json({

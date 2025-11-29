@@ -1,1 +1,2 @@
-export { SSHClient, SSHConfig } from './SSHClient';
+export { SSHClient } from './SSHClient';
+export * from './peer';
