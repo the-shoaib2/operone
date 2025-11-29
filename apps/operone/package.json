@@ -95,7 +95,7 @@
         "@vitejs/plugin-react": "^4.3.4",
         "autoprefixer": "^10.4.22",
         "concurrently": "^9.1.2",
-        "electron": "^34.0.0",
+        "electron": "^35.7.5",
         "electron-builder": "^26.0.12",
         "eslint": "^9.39.1",
         "postcss": "^8.5.6",
