@@ -20,7 +20,7 @@
         "@operone/ai": "workspace:*",
         "graphlib": "^2.1.8",
         "zod": "^3.23.8",
-        "nanoid": "^5.0.4"
+        "nanoid": "^5.0.9"
     },
     "devDependencies": {
         "@repo/eslint-config": "workspace:*",
