@@ -46,7 +46,7 @@ export default defineConfig({
           build: {
             outDir: 'dist-electron',
             rollupOptions: {
-              external: ['electron', 'electron-store', 'better-sqlite3'],
+              external: ['electron', 'better-sqlite3'],
               output: {
                 format: 'es',
               },
@@ -77,7 +77,7 @@ export default defineConfig({
   build: {
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
-      external: ['better-sqlite3', 'electron-store', '@repo/ai-engine', 'fs', 'path', 'os', 'child_process', '@repo/mcp-tools'],
+      external: ['better-sqlite3', '@repo/ai-engine', 'fs', 'path', 'os', 'child_process', '@repo/mcp-tools'],
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
@@ -94,6 +94,6 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    exclude: ['better-sqlite3', 'electron-store', '@repo/ai-engine', 'child_process', '@repo/mcp-tools']
+    exclude: ['better-sqlite3', '@repo/ai-engine', 'child_process', '@repo/mcp-tools']
   }
 })

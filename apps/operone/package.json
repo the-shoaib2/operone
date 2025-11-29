@@ -9,7 +9,7 @@
     "scripts": {
         "dev": "vite",
         "build": "node build-preload.mjs && vite build",
-        "build:electron": "node build-preload.mjs && vite build && electron-builder",
+        "build:operone": "node build-preload.mjs && vite build && electron-builder",
         "preview": "vite preview",
         "electron:dev": "concurrently \"vite\" \"wait-on -t 30000 http://localhost:5173 && electron .\"",
         "electron:dev-simple": "vite & sleep 5 && electron .",
@@ -117,6 +117,15 @@
     "build": {
         "appId": "com.operone.app",
         "productName": "Operone",
+        "files": [
+            "dist/**/*",
+            "dist-electron/**/*",
+            "package.json",
+            "node_modules/**/*"
+        ],
+        "asarUnpack": [
+            "**/node_modules/better-sqlite3/**/*"
+        ],
         "mac": {
             "category": "public.app-category.productivity"
         },
