@@ -14,7 +14,7 @@
     "dependencies": {
         "@repo/types": "workspace:*",
         "@operone/shared": "workspace:*",
-        "better-sqlite3": "^9.4.3",
+        "better-sqlite3": "12.5.0",
         "kysely": "^0.27.2"
     },
     "devDependencies": {
