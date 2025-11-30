@@ -13,14 +13,14 @@
         "test:coverage": "vitest run --coverage"
     },
     "dependencies": {
-        "@repo/types": "workspace:*",
-        "@operone/networking": "workspace:*"
+        "@operone/networking": "workspace:*",
+        "@repo/types": "workspace:*"
     },
     "devDependencies": {
         "@repo/eslint-config": "workspace:*",
         "@repo/typescript-config": "workspace:*",
-        "@types/node": "^22.15.3",
+        "@types/node": "^22.19.1",
         "typescript": "5.9.3",
-        "vitest": "^2.1.8"
+        "vitest": "^2.1.9"
     }
 }

@@ -12,18 +12,18 @@
         "check-types": "tsc --noEmit"
     },
     "dependencies": {
-        "@repo/types": "workspace:*",
+        "@operone/ai": "workspace:*",
+        "@operone/context": "workspace:*",
         "@operone/core": "workspace:*",
         "@operone/memory": "workspace:*",
         "@operone/thinking": "workspace:*",
-        "@operone/ai": "workspace:*",
-        "@operone/context": "workspace:*"
+        "@repo/types": "workspace:*"
     },
     "devDependencies": {
         "@repo/eslint-config": "workspace:*",
-        "@types/node": "^20.10.0",
+        "@types/node": "^20.19.25",
         "typescript": "5.9.3",
-        "vitest": "^2.1.8"
+        "vitest": "^2.1.9"
     },
     "keywords": [
         "operone",

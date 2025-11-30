@@ -14,14 +14,14 @@
     "dependencies": {
         "@repo/types": "workspace:*",
         "execa": "^8.0.1",
-        "shell-quote": "^1.8.1"
+        "shell-quote": "^1.8.3"
     },
     "devDependencies": {
         "@repo/eslint-config": "workspace:*",
-        "@types/node": "^20.10.0",
+        "@types/node": "^20.19.25",
         "@types/shell-quote": "^1.7.5",
         "typescript": "5.9.3",
-        "vitest": "^2.1.8"
+        "vitest": "^2.1.9"
     },
     "keywords": [
         "operone",

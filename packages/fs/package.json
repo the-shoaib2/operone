@@ -14,19 +14,19 @@
     },
     "dependencies": {
         "@repo/types": "workspace:*",
-        "fs-extra": "^11.2.0",
         "chokidar": "^3.6.0",
-        "pdf-parse": "^1.1.1",
-        "mammoth": "^1.8.0",
-        "glob": "^10.3.10"
+        "fs-extra": "^11.3.2",
+        "glob": "^10.5.0",
+        "mammoth": "^1.11.0",
+        "pdf-parse": "^1.1.4"
     },
     "devDependencies": {
         "@repo/eslint-config": "workspace:*",
-        "@types/node": "^20.10.0",
         "@types/fs-extra": "^11.0.4",
-        "@types/pdf-parse": "^1.1.4",
+        "@types/node": "^20.19.25",
+        "@types/pdf-parse": "^1.1.5",
         "typescript": "5.9.3",
-        "vitest": "^2.1.8"
+        "vitest": "^2.1.9"
     },
     "keywords": [
         "operone",

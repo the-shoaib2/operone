@@ -13,18 +13,18 @@
     },
     "dependencies": {
         "@repo/types": "workspace:*",
-        "puppeteer": "^21.6.1",
-        "playwright": "^1.40.1",
-        "jimp": "^0.22.10"
+        "jimp": "^0.22.12",
+        "playwright": "^1.57.0",
+        "puppeteer": "^21.11.0"
     },
     "optionalDependencies": {
         "robotjs": "^0.6.0"
     },
     "devDependencies": {
         "@repo/eslint-config": "workspace:*",
-        "@types/node": "^20.10.0",
+        "@types/node": "^20.19.25",
         "typescript": "5.9.3",
-        "vitest": "^2.1.8"
+        "vitest": "^2.1.9"
     },
     "keywords": [
         "operone",

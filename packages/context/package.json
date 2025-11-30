@@ -13,14 +13,23 @@
     },
     "dependencies": {
         "@repo/types": "workspace:*",
-        "tiktoken": "^1.0.10",
-        "langchain": "^0.0.200"
+        "langchain": "^0.0.200",
+        "tiktoken": "^1.0.22"
     },
     "devDependencies": {
         "@repo/eslint-config": "workspace:*",
-        "@types/node": "^20.10.0",
+        "@smithy/protocol-http": "^3.0.6",
+        "@smithy/signature-v4": "^2.0.10",
+        "@smithy/util-utf8": "^2.0.0",
+        "@types/node": "^20.19.25",
+        "d3-dsv": "^2.0.0",
+        "fast-xml-parser": "^4.2.7",
+        "ignore": "^5.2.0",
+        "mongodb": "^5.2.0",
+        "pdf-parse": "1.1.1",
+        "puppeteer": "^19.7.2",
         "typescript": "5.9.3",
-        "vitest": "^2.1.8"
+        "vitest": "^2.1.9"
     },
     "keywords": [
         "operone",

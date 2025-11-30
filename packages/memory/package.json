@@ -12,17 +12,17 @@
         "check-types": "tsc --noEmit"
     },
     "dependencies": {
-        "@repo/types": "workspace:*",
         "@operone/db": "workspace:*",
-        "lru-cache": "^10.2.0",
+        "@repo/types": "workspace:*",
+        "lru-cache": "^10.4.3",
         "lz4": "^0.6.5"
     },
     "devDependencies": {
         "@repo/eslint-config": "workspace:*",
-        "@types/node": "^20.10.0",
-        "@types/lz4": "^0.6.3",
+        "@types/lz4": "^0.6.4",
+        "@types/node": "^20.19.25",
         "typescript": "5.9.3",
-        "vitest": "^2.1.8"
+        "vitest": "^2.1.9"
     },
     "keywords": [
         "operone",

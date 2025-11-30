@@ -12,23 +12,23 @@
         "check-types": "tsc --noEmit"
     },
     "dependencies": {
-        "@repo/types": "workspace:*",
-        "@operone/memory": "workspace:*",
-        "@operone/fs": "workspace:*",
-        "@operone/shell": "workspace:*",
-        "@operone/networking": "workspace:*",
         "@operone/ai": "workspace:*",
+        "@operone/fs": "workspace:*",
         "@operone/mcp": "workspace:*",
+        "@operone/memory": "workspace:*",
+        "@operone/networking": "workspace:*",
+        "@operone/shell": "workspace:*",
+        "@repo/types": "workspace:*",
         "graphlib": "^2.1.8",
-        "zod": "^3.23.8",
-        "nanoid": "^5.0.4"
+        "nanoid": "^5.1.6",
+        "zod": "^3.25.76"
     },
     "devDependencies": {
         "@repo/eslint-config": "workspace:*",
-        "@types/node": "^20.10.0",
-        "@types/graphlib": "^2.1.11",
+        "@types/graphlib": "^2.1.12",
+        "@types/node": "^20.19.25",
         "typescript": "5.9.3",
-        "vitest": "^2.1.8"
+        "vitest": "^2.1.9"
     },
     "keywords": [
         "operone",
