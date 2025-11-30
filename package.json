@@ -9,13 +9,25 @@
   "private": true,
   "scripts": {
     "build": "turbo run build",
-    "dev": "turbo run dev",
+    "dev": "turbo run dev --concurrency=20",
+    "dev:operone": "turbo run dev --concurrency=20 --filter=operone",
+    "dev:web": "turbo run dev --concurrency=20 --filter=web",
+    "dev:docs": "turbo run dev --concurrency=20 --filter=docs",
+    "dev:apps": "turbo run dev --filter=apps",
+    "dev:packages": "turbo run dev --filter=packages",
+    "clean": "turbo run clean && find . -name node_modules -type d -exec rm -rf {} + 2>/dev/null || true && find . -name 'pnpm-lock.yaml' -delete && git clean -fd",
+    "clean:deps": "find . -name node_modules -type d -exec rm -rf {} + 2>/dev/null || true && find . -name 'pnpm-lock.yaml' -delete",
+    "clean:build": "turbo run clean && find . -name 'dist' -type d -exec rm -rf {} + 2>/dev/null || true && find . -name '.next' -type d -exec rm -rf {} + 2>/dev/null || true",
     "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "lint:fix": "turbo run lint --fix",
+    "format": "prettier --write \"**/*.{ts,tsx,md,json,js,jsx}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,md,json,js,jsx}\"",
     "check-types": "turbo run check-types",
     "test": "turbo run test",
     "test:coverage": "turbo run test:coverage",
     "test:watch": "vitest watch",
+    "test:ui": "vitest --ui",
+    "postinstall": "turbo run build",
     "changeset": "changeset",
     "changeset:add": "changeset add",
     "changeset:status": "changeset status",
@@ -23,18 +35,34 @@
     "changeset:publish": "changeset publish",
     "version": "pnpm changeset:version",
     "release": "pnpm build && pnpm changeset:publish",
-    "version:check": "changeset status --since=origin/main"
+    "version:check": "changeset status --since=origin/main",
+    "prepare": "husky install || true",
+    "precommit": "lint-staged",
+    "db:generate": "cd apps/web && pnpm prisma generate",
+    "db:push": "cd apps/web && pnpm prisma db push",
+    "db:studio": "cd apps/web && pnpm prisma studio",
+    "db:seed": "cd apps/web && pnpm prisma db seed",
+    "start": "pnpm dev",
+    "start:prod": "pnpm build && pnpm start",
+    "logs": "turbo run logs",
+    "status": "git status && pnpm list",
+    "why": "pnpm why",
+    "audit": "pnpm audit",
+    "audit:fix": "pnpm audit --fix",
+    "outdated": "pnpm outdated",
+    "upgrade": "pnpm update",
+    "upgrade:latest": "pnpm update --latest"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.5.2",
-    "@changesets/cli": "^2.29.7",
-    "@vitest/coverage-v8": "^2.1.8",
-    "@vitest/ui": "^2.1.8",
-    "prettier": "^3.6.2",
+    "@changesets/cli": "^2.29.8",
+    "@vitest/coverage-v8": "^2.1.9",
+    "@vitest/ui": "^2.1.9",
+    "prettier": "^3.7.3",
     "turbo": "^2.6.1",
     "typescript": "5.9.3",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^2.1.8"
+    "vitest": "^2.1.9"
   },
   "packageManager": "pnpm@9.0.0",
   "engines": {
@@ -43,6 +71,11 @@
   "dependencies": {
     "@types/better-sqlite3": "^7.6.13",
     "better-sqlite3": "12.5.0",
-    "zod": "^3.23.8"
+    "zod": "^3.25.76"
+  },
+  "pnpm": {
+    "peerDependencyRules": {
+      "ignoreMissing": ["zod"]
+    }
   }
 }
