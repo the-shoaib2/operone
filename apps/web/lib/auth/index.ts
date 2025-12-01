@@ -20,19 +20,42 @@ const nextAuth = NextAuth({
       async authorize(credentials) {
         const { response, challenge } = credentials as any
         
-        if (!response || !challenge) return null
+        if (!response || !challenge) {
+          console.error('[WebAuthn] Missing credentials')
+          return null
+        }
 
         try {
           const responseJson = JSON.parse(response)
           const credentialID = responseJson.id
 
-          // Find authenticator
+          if (!credentialID) {
+            console.error('[WebAuthn] Missing credentialID in response')
+            return null
+          }
+
+          // Find authenticator - select only needed fields for performance
           const authenticator = await prisma.authenticator.findUnique({
             where: { credentialID },
-            include: { user: true },
+            select: {
+              credentialID: true,
+              credentialPublicKey: true,
+              counter: true,
+              user: {
+                select: {
+                  id: true,
+                  email: true,
+                  name: true,
+                  image: true,
+                }
+              }
+            },
           })
 
-          if (!authenticator) return null
+          if (!authenticator) {
+            console.error('[WebAuthn] Authenticator not found for credentialID:', credentialID)
+            return null
+          }
 
           // Verify
           const verification = await verifyAuthenticationResponseForUser(
@@ -45,23 +68,25 @@ const nextAuth = NextAuth({
             }
           )
 
-          if (verification.verified) {
-             // Update counter
-             await prisma.authenticator.update({
-               where: { credentialID },
-               data: { counter: verification.authenticationInfo.newCounter },
-             })
-
-             return {
-               id: authenticator.user.id,
-               email: authenticator.user.email,
-               name: authenticator.user.name,
-               image: authenticator.user.image,
-             }
+          if (!verification.verified) {
+            console.error('[WebAuthn] Verification failed for user:', authenticator.user.email)
+            return null
           }
-          return null
+
+          // Update counter asynchronously (don't wait)
+          prisma.authenticator.update({
+            where: { credentialID },
+            data: { counter: verification.authenticationInfo.newCounter },
+          }).catch(err => console.error('[WebAuthn] Counter update failed:', err))
+
+          return {
+            id: authenticator.user.id,
+            email: authenticator.user.email,
+            name: authenticator.user.name,
+            image: authenticator.user.image,
+          }
         } catch (e) {
-          console.error('WebAuthn auth error:', e)
+          console.error('[WebAuthn] Authorization error:', e)
           return null
         }
       }

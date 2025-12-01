@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 import { rateLimiter, RATE_LIMITS, type RateLimitConfig } from './lib/security/rate-limiter'
-import { handleCsrfProtection } from './lib/security/csrf'
+import { handleCsrfProtection, requiresCsrfProtection } from './lib/security/csrf'
 import { applySecurityHeaders, applyRateLimitHeaders } from './lib/security/headers'
 import { securityLogger, SecurityEventType, LogLevel } from './lib/security/logger'
 
@@ -83,7 +83,7 @@ export async function proxy(request: NextRequest) {
 
   const isCsrfExempt = csrfExemptPaths.some(path => pathname.startsWith(path))
 
-  if (!isCsrfExempt) {
+  if (!isCsrfExempt && requiresCsrfProtection(request.method)) {
     const csrfResult = handleCsrfProtection(request, response)
     
     if (!csrfResult.valid) {
