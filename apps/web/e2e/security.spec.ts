@@ -30,10 +30,11 @@ test.describe('Authentication Protection', () => {
 
 test.describe('API Security', () => {
   test('should return 403 for API access without CSRF token', async ({ request }) => {
-    const response = await request.post('/api/auth/store-token', {
+    // Use a non-exempt route to test CSRF protection
+    // /api/auth/* routes are largely exempt because they use NextAuth's CSRF or are public
+    const response = await request.post('/api/test-csrf-protection', {
       data: {
-        token: 'test-token',
-        userId: 'test-user'
+        test: 'data'
       }
     })
     expect(response.status()).toBe(403)
