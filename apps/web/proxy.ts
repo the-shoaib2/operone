@@ -76,6 +76,7 @@ export async function proxy(request: NextRequest) {
     '/api/auth/session',
     '/api/auth/validate-token',
     '/api/auth/store-token',
+     '/api/webauthn',
     '/_next',
     '/favicon.ico',
   ]
