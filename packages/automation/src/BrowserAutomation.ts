@@ -13,7 +13,7 @@ export class BrowserAutomation {
 
   async launch(): Promise<void> {
     this.browser = await puppeteer.launch({
-      headless: this.options.headless ? 'new' : false,
+      headless: this.options.headless,
       slowMo: this.options.slowMo,
     });
     this.page = await this.browser.newPage();

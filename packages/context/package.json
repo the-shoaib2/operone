@@ -27,7 +27,7 @@
         "ignore": "^5.2.0",
         "mongodb": "^5.2.0",
         "pdf-parse": "1.1.1",
-        "puppeteer": "^19.7.2",
+        "puppeteer": "^24.31.0",
         "typescript": "5.9.3",
         "vitest": "^2.1.9"
     },
