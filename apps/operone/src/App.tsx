@@ -14,7 +14,7 @@ import { Loader } from './components/ai/loader'
 // Lazy load feature components
 const ChatInterface = lazy(() => import('./features/chat/chat').then(module => ({ default: module.default })))
 const UnifiedSettings = lazy(() => import('./features/settings/index').then(module => ({ default: module.UnifiedSettings })))
-const AddModelPage = lazy(() => import('./features/settings/add-model-page').then(module => ({ default: module.AddModelPage })))
+
 
 function LoadingSpinner() {
     return (
@@ -67,7 +67,7 @@ function AppContent() {
                     <Routes>
                         <Route path="/dashboard/chat" element={<ChatInterface />} />
                         <Route path="/settings" element={<UnifiedSettings />} />
-                        <Route path="/settings/models/add" element={<AddModelPage />} />
+
                         <Route path="/" element={<Navigate to="/dashboard/chat" replace />} />
                         <Route path="/dashboard" element={<Navigate to="/dashboard/chat" replace />} />
                     </Routes>

@@ -3,7 +3,8 @@ import { FileTool } from './FileTool';
 import { ShellTool } from './ShellTool';
 import { LogTool } from './LogTool';
 import { toolRegistry, ToolSchema } from './ToolRegistry';
-import { SSHClient } from '@operone/networking'; 
+// SSHClient imported dynamically to avoid browser bundle issues
+ 
 
 export interface Tool {
   name: string;
@@ -155,6 +156,8 @@ export class MCPBroker extends EventEmitter {
 
   private async callRemoteTool(name: string, args: any, sshConfig: any): Promise<any> {
     
+    // Dynamic import to avoid bundling ssh2 in browser/renderer if not needed
+    const { SSHClient } = await import('@operone/networking');
     const client = new SSHClient(sshConfig);
     await client.connect();
     

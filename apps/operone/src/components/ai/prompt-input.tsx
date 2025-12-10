@@ -1447,7 +1447,7 @@ export const PromptInputModelSelector = ({
   onModelChange,
   onAddModel,
   className,
-  placeholder = "Select a model",
+  placeholder = "Add model",
   maxContentHeight = "400px",
   maxContentWidth = "320px",
   showCategories = true,
@@ -1486,9 +1486,11 @@ export const PromptInputModelSelector = ({
         </div>
       </PromptInputSelectTrigger>
       <PromptInputSelectContent
+        position="popper"
+        align="center"
+        sideOffset={8}
         className={cn(
           "border-0 shadow-lg rounded-xl bg-background/95 backdrop-blur-sm p-0.5",
-          "max-h-[var(--radix-select-content-trigger-height)]",
           "overflow-hidden"
         )}
         style={{

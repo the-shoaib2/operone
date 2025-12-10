@@ -16,11 +16,6 @@
         "downlevelIteration": true,
         "isolatedModules": false,
         "baseUrl": ".",
-        "paths": {
-            "@repo/*": [
-                "../../packages/*/src"
-            ]
-        }
     },
     "include": [
         "src/**/*"

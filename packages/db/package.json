@@ -4,6 +4,7 @@
     "description": "Unified database interface for Operone",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
+    "type": "commonjs",
     "scripts": {
         "build": "tsc",
         "dev": "tsc --watch",

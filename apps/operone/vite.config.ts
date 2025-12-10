@@ -46,11 +46,32 @@ export default defineConfig({
           build: {
             outDir: 'dist-electron',
             rollupOptions: {
-              external: ['electron', 'better-sqlite3'],
+              external: [
+                'electron',
+                'better-sqlite3',
+                '@operone/core',
+                '@operone/thinking',
+                '@operone/db',
+                '@operone/mcp',
+                '@operone/networking',
+                '@operone/utils',
+                'ssh2'
+              ],
               output: {
                 format: 'es',
               },
               plugins: [rewriteCommonJSImports()],
+            },
+          },
+          resolve: {
+            alias: {
+              '@': path.resolve(__dirname, './src'),
+              '@operone/mcp': path.resolve(__dirname, '../../packages/mcp/src'),
+              '@operone/networking': path.resolve(__dirname, '../../packages/networking/src'),
+              '@operone/core': path.resolve(__dirname, '../../packages/core/src'),
+              '@operone/db': path.resolve(__dirname, '../../packages/db/src'),
+              '@operone/thinking': path.resolve(__dirname, '../../packages/thinking/src'),
+              '@repo/operone': path.resolve(__dirname, '../../packages/operone/src'),
             },
           },
         },
@@ -69,6 +90,7 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
       '@operone/mcp': path.resolve(__dirname, '../../packages/mcp/src'),
+      '@operone/networking': path.resolve(__dirname, '../../packages/networking/src'),
     },
   },
   server: {
@@ -85,7 +107,7 @@ export default defineConfig({
     },
     chunkSizeWarningLimit: 500,
     rollupOptions: {
-      external: ['better-sqlite3', '@repo/ai-engine', 'fs', 'path', 'os', 'child_process', '@repo/mcp-tools'],
+      external: ['better-sqlite3', '@repo/ai-engine', 'fs', 'path', 'os', 'child_process', '@repo/mcp-tools', 'ssh2', 'net', 'dgram'],
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
@@ -116,6 +138,6 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    exclude: ['better-sqlite3', '@repo/ai-engine', 'child_process', '@repo/mcp-tools']
+    exclude: ['better-sqlite3', '@repo/ai-engine', 'child_process', '@repo/mcp-tools', '@operone/networking', '@operone/mcp']
   }
 })

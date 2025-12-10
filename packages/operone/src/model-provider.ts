@@ -186,45 +186,14 @@ export class ModelProvider {
  */
 export class ModelRegistry {
   private static models: Record<ProviderType, ModelInfo[]> = {
-    openai: [
-      { id: 'gpt-4o', name: 'GPT-4o', provider: 'openai', contextWindow: 128000, description: 'Most capable GPT-4 model' },
-      { id: 'gpt-4o-mini', name: 'GPT-4o Mini', provider: 'openai', contextWindow: 128000, description: 'Affordable and fast' },
-      { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', provider: 'openai', contextWindow: 128000, description: 'Previous generation flagship' },
-      { id: 'gpt-4', name: 'GPT-4', provider: 'openai', contextWindow: 8192, description: 'Original GPT-4' },
-      { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', provider: 'openai', contextWindow: 16385, description: 'Fast and efficient' },
-    ],
-    anthropic: [
-      { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet', provider: 'anthropic', contextWindow: 200000, description: 'Most intelligent model' },
-      { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku', provider: 'anthropic', contextWindow: 200000, description: 'Fastest model' },
-      { id: 'claude-3-opus-20240229', name: 'Claude 3 Opus', provider: 'anthropic', contextWindow: 200000, description: 'Powerful model for complex tasks' },
-      { id: 'claude-3-sonnet-20240229', name: 'Claude 3 Sonnet', provider: 'anthropic', contextWindow: 200000, description: 'Balanced model' },
-      { id: 'claude-3-haiku-20240307', name: 'Claude 3 Haiku', provider: 'anthropic', contextWindow: 200000, description: 'Fast and compact' },
-    ],
-    google: [
-      { id: 'gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash', provider: 'google', contextWindow: 1000000, description: 'Latest experimental model' },
-      { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', provider: 'google', contextWindow: 2000000, description: 'Most capable Gemini model' },
-      { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', provider: 'google', contextWindow: 1000000, description: 'Fast and efficient' },
-      { id: 'gemini-1.0-pro', name: 'Gemini 1.0 Pro', provider: 'google', contextWindow: 32000, description: 'Stable pro model' },
-    ],
-    mistral: [
-      { id: 'mistral-large-latest', name: 'Mistral Large', provider: 'mistral', contextWindow: 128000, description: 'Most capable Mistral model' },
-      { id: 'mistral-small-latest', name: 'Mistral Small', provider: 'mistral', contextWindow: 32000, description: 'Efficient and fast' },
-      { id: 'codestral-latest', name: 'Codestral', provider: 'mistral', contextWindow: 32000, description: 'Specialized for code' },
-      { id: 'mistral-medium', name: 'Mistral Medium', provider: 'mistral', contextWindow: 32000, description: 'Balanced model' },
-      { id: 'open-mixtral-8x22b', name: 'Mixtral 8x22B', provider: 'mistral', contextWindow: 64000, description: 'Open source powerhouse' },
-    ],
+    openai: [],
+    anthropic: [],
+    google: [],
+    mistral: [],
     ollama: [],
-    openrouter: [
-      { id: 'anthropic/claude-3.5-sonnet', name: 'Claude 3.5 Sonnet', provider: 'openrouter', description: 'Via OpenRouter' },
-      { id: 'openai/gpt-4o', name: 'GPT-4o', provider: 'openrouter', description: 'Via OpenRouter' },
-      { id: 'google/gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash', provider: 'openrouter', description: 'Via OpenRouter' },
-      { id: 'meta-llama/llama-3.3-70b-instruct', name: 'Llama 3.3 70B', provider: 'openrouter', description: 'Via OpenRouter' },
-      { id: 'meta-llama/llama-3.1-405b-instruct', name: 'Llama 3.1 405B', provider: 'openrouter', description: 'Largest open model' },
-      { id: 'mistralai/mistral-large-2407', name: 'Mistral Large 2', provider: 'openrouter', description: 'Via OpenRouter' },
-      { id: 'nvidia/llama-3.1-nemotron-70b-instruct', name: 'Llama 3.1 Nemotron', provider: 'openrouter', description: 'NVIDIA optimized' },
-      { id: 'qwen/qwen-2.5-72b-instruct', name: 'Qwen 2.5 72B', provider: 'openrouter', description: 'Top tier open model' },
-    ],
+    openrouter: [],
     local: [],
+    custom: [],
   };
 
   /**

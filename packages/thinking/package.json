@@ -4,6 +4,11 @@
     "description": "Planning and reasoning engine for Operone",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
+    "type": "commonjs",
+    "exports": {
+        ".": "./dist/index.js",
+        "./*": "./dist/*.js"
+    },
     "scripts": {
         "build": "tsc",
         "dev": "tsc --watch",
