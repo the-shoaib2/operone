@@ -13,8 +13,8 @@ test.describe('Thinking Pipeline E2E (Browser Mode)', () => {
     // Verify the main chat interface is visible
     await expect(page.locator('body')).toBeVisible();
     
-    // Check for chat input
-    const chatInput = page.locator('textarea[placeholder*="message"]');
+    // Check for chat input using data-testid
+    const chatInput = page.locator('[data-testid="chat-input"]');
     await expect(chatInput).toBeVisible();
   });
 
@@ -32,14 +32,12 @@ test.describe('Thinking Pipeline E2E (Browser Mode)', () => {
   });
 
   test('should send a message and display response', async ({ page }) => {
-    // Find and fill the chat input
-    const chatInput = page.locator('textarea[placeholder*="message"]').first();
+    // Find and fill the chat input using data-testid
+    const chatInput = page.locator('[data-testid="chat-input"]').first();
     await chatInput.fill('Hello, test message');
     
-    // Submit the message (look for send button or press Enter)
-    const sendButton = page.locator('button[type="submit"]').or(
-      page.locator('button:has-text("Send")')
-    ).first();
+    // Submit the message using data-testid
+    const sendButton = page.locator('[data-testid="send-button"]').first();
     
     if (await sendButton.isVisible({ timeout: 1000 }).catch(() => false)) {
       await sendButton.click();
@@ -61,14 +59,12 @@ test.describe('Thinking Pipeline E2E (Browser Mode)', () => {
       await page.waitForTimeout(500);
     }
     
-    // Send a complex request that should trigger the pipeline
-    const chatInput = page.locator('textarea[placeholder*="message"]').first();
+    // Send a complex request that should trigger the pipeline using data-testid
+    const chatInput = page.locator('[data-testid="chat-input"]').first();
     await chatInput.fill('Create a plan to build a simple React todo app');
     
-    // Submit the message
-    const sendButton = page.locator('button[type="submit"]').or(
-      page.locator('button:has-text("Send")')
-    ).first();
+    // Submit the message using data-testid
+    const sendButton = page.locator('[data-testid="send-button"]').first();
     
     if (await sendButton.isVisible({ timeout: 1000 }).catch(() => false)) {
       await sendButton.click();

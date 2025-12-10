@@ -1,5 +1,5 @@
 import * as React from "react"
-import { useCallback, useMemo, useState, useEffect } from "react"
+import { useCallback, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 
 import {
@@ -101,6 +101,7 @@ export const ChatPromptInput = React.memo(function ChatPromptInput({
   return (
     <PromptInput onSubmit={handleSubmit}>
       <PromptInputTextarea
+        data-testid="chat-input"
         value={input}
         onChange={handleInputChange}
         onFocus={onFocus}
@@ -132,7 +133,7 @@ export const ChatPromptInput = React.memo(function ChatPromptInput({
             />
           )}
         </PromptInputTools>
-        <PromptInputSubmit disabled={!input.trim()} status={status} />
+        <PromptInputSubmit data-testid="send-button" disabled={!input.trim()} status={status} />
       </PromptInputFooter>
     </PromptInput>
   );

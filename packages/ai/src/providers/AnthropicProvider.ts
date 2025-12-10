@@ -1,6 +1,23 @@
 import { ModelProvider, ModelOptions } from '../types';
 import Anthropic from '@anthropic-ai/sdk';
 
+export interface ToolCall {
+  id: string;
+  name: string;
+  arguments: Record<string, any>;
+}
+
+export interface ToolResult {
+  toolCallId: string;
+  result: any;
+  error?: string;
+}
+
+export interface ToolCallOptions extends ModelOptions {
+  tools?: any[];
+  toolChoice?: 'auto' | 'required' | 'any' | { type: 'tool'; name: string };
+}
+
 export class AnthropicProvider implements ModelProvider {
   id = 'anthropic';
   providerType = 'anthropic' as const;
@@ -61,4 +78,23 @@ export class AnthropicProvider implements ModelProvider {
   isReady(): boolean {
     return !!this.client.apiKey;
   }
+
+  /* TODO: Fix tool calling implementation - currently incompatible with SDK version
+  async generateWithTools(
+    prompt: string,
+    options: ToolCallOptions
+  ): Promise<{ content?: string; toolCalls?: ToolCall[] }> {
+    // Tool calling implementation commented out temporarily
+    throw new Error('Tool calling not yet implemented');
+  }
+
+  async continueWithToolResults(
+    messages: any[],
+    toolResults: ToolResult[],
+    options: ToolCallOptions
+  ): Promise<{ content?: string; toolCalls?: ToolCall[] }> {
+    // Tool calling implementation commented out temporarily
+    throw new Error('Tool calling not yet implemented');
+  }
+  */
 }

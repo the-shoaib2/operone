@@ -14,7 +14,8 @@
         "check-types": "tsc --noEmit"
     },
     "dependencies": {
-        "@repo/types": "workspace:*"
+        "@repo/types": "workspace:*",
+        "zod": "^3.22.4"
     },
     "devDependencies": {
         "@repo/eslint-config": "workspace:*",

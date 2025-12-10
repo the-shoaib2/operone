@@ -1,7 +1,7 @@
 import { MCPTool } from '@repo/types';
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import { permissionManager } from './PermissionManager';
+import { permissionManager } from './PermissionManager.js';
 
 const execAsync = promisify(exec);
 

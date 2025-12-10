@@ -25,7 +25,7 @@ export const osPackages: OSPackage[] = [
         name: 'Networking',
         icon: Network,
         route: '/networking',
-        description: 'Network topology simulation with 5 PCs supporting all topology types',
+        description: 'Network topology simulation with 5 PCs',
         category: 'network'
     },
     {
@@ -41,7 +41,7 @@ export const osPackages: OSPackage[] = [
         name: 'Shell',
         icon: Terminal,
         route: '/shell',
-        description: 'Command-line interface and shell operations',
+        description: 'Command-line interface and shell ops',
         category: 'core'
     },
     {
@@ -57,7 +57,7 @@ export const osPackages: OSPackage[] = [
         name: 'Memory',
         icon: MemoryStick,
         route: '/memory',
-        description: 'Memory management and allocation visualization',
+        description: 'Memory management and allocation view',
         category: 'system'
     },
     {
@@ -81,7 +81,7 @@ export const osPackages: OSPackage[] = [
         name: 'Automation',
         icon: Settings,
         route: '/automation',
-        description: 'System automation and scripting',
+        description: 'System automation and scripting tools',
         category: 'core'
     }
 ];

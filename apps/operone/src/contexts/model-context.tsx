@@ -44,6 +44,37 @@ export function ModelDetectorProvider({ children }: { children: ReactNode }) {
 
   const ollamaDetector = OllamaDetector.getInstance();
 
+  // Detect imported GGUF models from electron storage
+  const detectImportedModels = async () => {
+    try {
+      // @ts-ignore
+      if (!window.electronAPI?.model) {
+        return [];
+      }
+
+      // @ts-ignore
+      const ggufModels = await window.electronAPI.model.list();
+
+      // Convert GGUF models to ModelInfo format
+      const modelInfos: ModelInfo[] = ggufModels.map((model: any) => ({
+        id: `local:${model.id}`,
+        name: model.name,
+        provider: 'local' as const,
+        description: `${model.parameterCount || 'Unknown size'} • ${model.quantization || 'GGUF'} • ${(model.fileSize / (1024 * 1024 * 1024)).toFixed(2)}GB`,
+        contextLength: model.contextSize || 2048,
+        isLocal: true,
+        isActive: false,
+        requiresAuth: false,
+        authStatus: 'not_required' as const,
+      }));
+
+      return modelInfos;
+    } catch (err) {
+      console.error('Failed to detect imported GGUF models:', err);
+      return [];
+    }
+  };
+
   // Detect Ollama models
   const detectOllamaModels = async () => {
     try {
@@ -89,6 +120,10 @@ export function ModelDetectorProvider({ children }: { children: ReactNode }) {
       // Detect Ollama models
       const ollamaModelInfos = await detectOllamaModels();
       models.push(...ollamaModelInfos);
+
+      // Detect imported GGUF models
+      const importedModelInfos = await detectImportedModels();
+      models.push(...importedModelInfos);
 
       // Note: Cloud provider models will be added when user configures them with API keys
       setAvailableModels(models);
@@ -150,14 +185,15 @@ export function ModelDetectorProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     detectAllModels();
 
-    // Set up periodic refresh for Ollama models
-    const interval = setInterval(() => {
-      detectOllamaModels().then(modelInfos => {
-        setAvailableModels(prev => {
-          // Remove old Ollama models and add new ones
-          const nonOllamaModels = prev.filter(m => m.provider !== 'ollama');
-          return [...nonOllamaModels, ...modelInfos];
-        });
+    // Set up periodic refresh for all models
+    const interval = setInterval(async () => {
+      const ollamaModelInfos = await detectOllamaModels();
+      const importedModelInfos = await detectImportedModels();
+
+      setAvailableModels(prev => {
+        // Remove old Ollama and local models, add refreshed ones
+        const otherModels = prev.filter(m => m.provider !== 'ollama' && m.provider !== 'local');
+        return [...otherModels, ...ollamaModelInfos, ...importedModelInfos];
       });
     }, 30000); // Refresh every 30 seconds
 

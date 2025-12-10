@@ -1,6 +1,23 @@
 import { ModelProvider, ModelOptions } from '../types';
 import OpenAI from 'openai';
 
+export interface ToolCall {
+  id: string;
+  name: string;
+  arguments: Record<string, any>;
+}
+
+export interface ToolResult {
+  toolCallId: string;
+  result: any;
+  error?: string;
+}
+
+export interface ToolCallOptions extends ModelOptions {
+  tools?: any[];
+  toolChoice?: 'auto' | 'required' | 'none' | { type: 'function'; function: { name: string } };
+}
+
 export class OpenAIProvider implements ModelProvider {
   id = 'openai';
   providerType = 'openai' as const;
@@ -67,4 +84,23 @@ export class OpenAIProvider implements ModelProvider {
   isReady(): boolean {
     return !!this.client.apiKey;
   }
+
+  /* TODO: Fix tool calling implementation - currently incompatible with SDK version
+  async generateWithTools(
+    prompt: string,
+    options: ToolCallOptions
+  ): Promise<{ content?: string; toolCalls?: ToolCall[] }> {
+    // Implementation commented out - incompatible with current OpenAI SDK
+    throw new Error('Tool calling not yet implemented');
+  }
+
+  async continueWithToolResults(
+    messages: any[],
+    toolResults: ToolResult[],
+    options: ToolCallOptions
+  ): Promise<{ content?: string; toolCalls?: ToolCall[] }> {
+    // Implementation commented out - incompatible with current OpenAI SDK
+    throw new Error('Tool calling not yet implemented');
+  }
+  */
 }

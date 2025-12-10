@@ -47,3 +47,8 @@ export type {
   PeerNetworkConfig,
   ConnectedPeer
 } from './PeerNetwork';
+
+// Peer registry and routing
+export * from './peer-registry';
+export * from './tool-router';
+export * from './distributed-executor';

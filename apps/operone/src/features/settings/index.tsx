@@ -172,7 +172,7 @@ export function UnifiedSettings() {
                         <div className="mb-4">
                             <h1 className="text-lg font-semibold tracking-tight flex items-center gap-2">
                                 <Settings className="w-4 h-4" />
-                                AI
+                                Models
                             </h1>
                         </div>
                         <AISettings />

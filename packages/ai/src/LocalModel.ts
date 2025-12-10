@@ -96,10 +96,72 @@ export class LocalModel implements ModelProvider {
   }
 
   async *stream(prompt: string, options?: ModelOptions): AsyncIterable<string> {
-      throw new Error("Streaming not implemented for LocalModel yet");
+    if (!this.initialized || !this.llama) {
+      await this.load();
+    }
+
+    try {
+      const genOptions = options as any;
+      
+      const params: Generate = {
+        prompt,
+        nThreads: this.config.threads ?? 4,
+        nTokPredict: genOptions?.maxTokens ?? 1024,
+        topK: genOptions?.topK ?? 40,
+        topP: genOptions?.topP ?? 0.95,
+        temp: genOptions?.temperature ?? 0.7,
+        repeatPenalty: genOptions?.frequencyPenalty ? (1 + genOptions.frequencyPenalty) : 1.1,
+        ...genOptions
+      };
+
+      // Create a promise-based wrapper for the callback-based inference
+      const stream = new ReadableStream({
+        start: (controller) => {
+          this.llama!.inference(params, (response: InferenceResult) => {
+            if (response.type === InferenceResultType.Data) {
+              if (response.data) {
+                controller.enqueue(response.data.token);
+              }
+            } else if (response.type === InferenceResultType.End) {
+              controller.close();
+            } else if (response.type === InferenceResultType.Error) {
+              controller.error(new Error(response.message || 'Unknown error'));
+            }
+          });
+        }
+      });
+
+      const reader = stream.getReader();
+      const decoder = new TextDecoder();
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          if (value) {
+            yield decoder.decode(value, { stream: true });
+          }
+        }
+      } finally {
+        reader.releaseLock();
+      }
+    } catch (error) {
+      console.error('Streaming failed:', error);
+      throw error;
+    }
   }
 
   isLoaded(): boolean {
     return this.initialized;
   }
+
+  async unload(): Promise<void> {
+    if (this.llama) {
+      // llama-cpp doesn't have explicit unload, but we can clear the reference
+      this.llama = null;
+      this.initialized = false;
+      console.log('Model unloaded');
+    }
+  }
 }
+

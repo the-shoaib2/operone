@@ -1,4 +1,4 @@
-import { Tool } from './Broker';
+import { Tool } from './Broker.js';
 
 export interface ToolParameter {
   type: string;

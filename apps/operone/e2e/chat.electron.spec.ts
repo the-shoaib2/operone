@@ -48,15 +48,15 @@ test('chat interface works', async () => {
   // Wait for load
   await window.waitForLoadState('domcontentloaded')
   
-  // Look for the chat input area
-  const inputArea = window.locator('textarea[placeholder="Type your message..."]')
+  // Look for the chat input area using data-testid
+  const inputArea = window.locator('[data-testid="chat-input"]')
   await expect(inputArea).toBeVisible()
   
   // Type a message
   await inputArea.fill('Hello AI')
   
-  // Click send button
-  const sendButton = window.locator('button[type="submit"]')
+  // Click send button using data-testid
+  const sendButton = window.locator('[data-testid="send-button"]')
   await sendButton.click()
   
   // Verify user message appears

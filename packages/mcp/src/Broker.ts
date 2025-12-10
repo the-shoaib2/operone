@@ -1,8 +1,8 @@
 import { EventEmitter } from 'events';
-import { FileTool } from './FileTool';
-import { ShellTool } from './ShellTool';
-import { LogTool } from './LogTool';
-import { toolRegistry, ToolSchema } from './ToolRegistry';
+import { FileTool } from './FileTool.js';
+import { ShellTool } from './ShellTool.js';
+import { LogTool } from './LogTool.js';
+import { toolRegistry, ToolSchema } from './ToolRegistry.js';
 // SSHClient imported dynamically to avoid browser bundle issues
  
 

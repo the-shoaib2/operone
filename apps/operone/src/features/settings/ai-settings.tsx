@@ -1,137 +1,114 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
+
 import { useAI } from '@/contexts/ai-context'
+import { useModelDetector } from '@/contexts/model-context'
 import type { ProviderConfig, ProviderType } from '@repo/types'
-import { OllamaDetector, type OllamaModel } from '@/utils/ollama-detector'
 import { cn } from '@/lib/utils'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
     Loader2Icon,
     RefreshCwIcon,
-    ServerIcon,
     HardDriveIcon,
-    CheckIcon,
-    PlusIcon,
-    ArrowLeftIcon,
-    DatabaseIcon
-} from "lucide-react"
-
-// Simplified Provider Options for Dropdown
-const PROVIDER_OPTIONS = [
-    { value: "openai", label: "OpenAI" },
-    { value: "anthropic", label: "Anthropic" },
-    { value: "google", label: "Google Gemini" },
-    { value: "mistral", label: "Mistral AI" },
-    { value: "openrouter", label: "OpenRouter" },
-    // Ollama is handled via detection, but allow manual add if needed
-    { value: "ollama", label: "Ollama (Manual)" },
-];
+    TrashIcon,
+    AlertCircleIcon,
+    CheckCircleIcon,
+} from 'lucide-react'
 
 export function AISettings() {
-    // Top level state to toggle between List and Add
-    const [view, setView] = useState<'list' | 'add'>('list');
-
     return (
-        <div className="space-y-6">
-            {view === 'list' ? (
-                <AISettingsList onAddClick={() => setView('add')} />
-            ) : (
-                <AISettingsAdd onCancel={() => setView('list')} onSave={() => setView('list')} />
-            )}
+        <div className="h-full flex flex-col">
+            <div className="flex-1 overflow-auto p-6">
+                <ModelsTab />
+            </div>
         </div>
     )
 }
 
-function AISettingsList({ onAddClick }: { onAddClick: () => void }) {
-    const { activeProvider, allProviders, setActiveProvider, removeProvider, testProvider, addProvider } = useAI()
-    const [isTesting, setIsTesting] = useState(false)
-    const [testResult, setTestResult] = useState<{ success: boolean; error?: string } | null>(null)
+function ModelsTab() {
+    const { availableModels, isLoading, refreshModels } = useModelDetector()
+    const [filter, setFilter] = useState('')
 
-    // Ollama detection state
-    const [ollamaDetector] = useState(() => OllamaDetector.getInstance())
-    const [isDetectingOllama, setIsDetectingOllama] = useState(false)
-    const [ollamaAvailable, setOllamaAvailable] = useState(false)
-    const [detectedOllamaModels, setDetectedOllamaModels] = useState<OllamaModel[]>([])
+    const filteredModels = availableModels.filter(model =>
+        model.name.toLowerCase().includes(filter.toLowerCase()) ||
+        model.provider.toLowerCase().includes(filter.toLowerCase())
+    )
 
-    useEffect(() => {
-        detectOllama()
-    }, [])
+    return (
+        <div className="space-y-6 max-w-5xl">
+            {/* Import Local Model Section */}
+            <Card className="p-6">
+                <h3 className="text-lg font-semibold mb-4">Import Local Model</h3>
+                <LocalModelForm onComplete={refreshModels} />
+            </Card>
 
-    const detectOllama = async () => {
-        setIsDetectingOllama(true)
-        try {
-            const available = await ollamaDetector.checkAvailability()
-            setOllamaAvailable(available)
+            {/* Provider Configuration Section */}
+            <Card className="p-6">
+                <h3 className="text-lg font-semibold mb-4">Provider Configuration</h3>
+                <ProviderConfigForm />
+            </Card>
 
-            if (available) {
-                const models = await ollamaDetector.getAvailableModels()
-                setDetectedOllamaModels(models)
-            } else {
-                setDetectedOllamaModels([])
-            }
-        } catch (error) {
-            console.error('Failed to detect Ollama:', error)
-            setOllamaAvailable(false)
-        } finally {
-            setIsDetectingOllama(false)
-        }
-    }
+            {/* Models List Section */}
+            <div>
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold">Available Models</h3>
+                    <div className="flex gap-2">
+                        <Input
+                            placeholder="Search models..."
+                            value={filter}
+                            onChange={(e) => setFilter(e.target.value)}
+                            className="h-9 w-64"
+                            data-testid="search-models-input"
+                        />
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={refreshModels}
+                            disabled={isLoading}
+                            data-testid="refresh-models-button"
+                        >
+                            <RefreshCwIcon className={cn("w-4 h-4 mr-2", isLoading && "animate-spin")} />
+                            Refresh
+                        </Button>
+                    </div>
+                </div>
 
-    const handleTestProvider = async (providerId: string) => {
-        setIsTesting(true)
-        setTestResult(null)
-        try {
-            const result = await testProvider(providerId)
-            setTestResult(result)
-        } catch (error) {
-            setTestResult({ success: false, error: 'Test failed' })
-        } finally {
-            setIsTesting(false)
-        }
-    }
+                <div className="space-y-2">
+                    {filteredModels.length === 0 ? (
+                        <div className="text-center py-12 text-muted-foreground">
+                            <HardDriveIcon className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                            <p className="text-lg font-medium">No models found</p>
+                            <p className="text-sm mt-1">Import a model or configure a provider to get started</p>
+                        </div>
+                    ) : (
+                        filteredModels.map((model) => (
+                            <ModelCard key={model.id} model={model} />
+                        ))
+                    )}
+                </div>
+            </div>
+        </div>
+    )
+}
 
-    const handleSetActiveProvider = async (providerId: string) => {
-        try {
-            await setActiveProvider(providerId)
-        } catch (error) {
-            console.error('Failed to set active provider:', error)
-        }
-    }
+function ModelCard({ model }: { model: any }) {
+    const [isExpanded, setIsExpanded] = useState(false)
+    const { refreshModels } = useModelDetector()
+    const [isDeleting, setIsDeleting] = useState(false)
 
-    const handleRemoveProvider = async (providerId: string) => {
-        if (confirm('Are you sure you want to remove this provider?')) {
-            try {
-                await removeProvider(providerId)
-            } catch (error) {
-                console.error('Failed to remove provider:', error)
-            }
-        }
-    }
-
-    const handleAddDetectedOllama = async (model: OllamaModel) => {
-        const id = `ollama-${model.name}`;
-        // Check if already exists
-        if (allProviders[id]) {
-            handleSetActiveProvider(id);
-            return;
-        }
-
-        const config: ProviderConfig = {
-            type: 'ollama',
-            model: model.name,
-            baseURL: 'http://localhost:11434'
-        };
-        await addProvider(id, config);
-        // await handleSetActiveProvider(id); // Optional: auto-activate?
-    };
-
-    const getProviderIcon = (type: ProviderType) => {
-        const icons: Record<ProviderType, string> = {
+    const getProviderIcon = (provider: string) => {
+        const icons: Record<string, string> = {
             openai: '🤖',
             anthropic: '🧠',
             google: '🔍',
@@ -139,396 +116,348 @@ function AISettingsList({ onAddClick }: { onAddClick: () => void }) {
             ollama: '🦙',
             openrouter: '🛣️',
             local: '📦',
-            custom: '⚙️'
+            custom: '⚙️',
         }
-        return icons[type] || '🤖'
+        return icons[provider] || '🤖'
     }
 
-    // Combine configured providers and detected models not yet configured
-    // We want to show a unified list of "Available Models"
+    const handleDelete = async () => {
+        if (!confirm(`Are you sure you want to remove "${model.name}"?`)) {
+            return
+        }
 
-    // 1. Get all Configured Providers
-    const configuredList = Object.entries(allProviders).map(([id, config]) => ({
-        id,
-        config,
-        isConfigured: true,
-        source: 'configured' as const
-    }));
+        setIsDeleting(true)
+        try {
+            // For local models, call the electron API to remove
+            if (model.provider === 'local' && model.id.startsWith('local:')) {
+                const modelId = model.id.replace('local:', '')
+                // @ts-ignore
+                const result = await window.electronAPI.model.remove(modelId)
 
-    // 2. Get Detected Ollama Models that are NOT in configured list
-    // We check by model name generally, assuming ID convention or just checking if a provider with that model exists?
-    // Actually simpler: Just show them as separate items "Detected (Not Configured)" if they aren't configured.
-    // A simple heuristic: check if any provider has type='ollama' and model={model.name}
-    const detectedList = detectedOllamaModels.filter(m => {
-        return !Object.values(allProviders).some(p => p.type === 'ollama' && p.model === m.name);
-    }).map(m => ({
-        id: `detected-${m.name}`,
-        config: { type: 'ollama' as ProviderType, model: m.name, baseURL: 'http://localhost:11434' } as ProviderConfig,
-        isConfigured: false,
-        source: 'detected' as const,
-        details: m.details
-    }));
+                if (result.success) {
+                    // Refresh the models list
+                    await refreshModels()
+                } else {
+                    alert('Failed to remove model')
+                }
+            } else {
+                // For other providers, you might have different logic
+                alert('Removing this model type is not yet implemented')
+            }
+        } catch (error) {
+            console.error('Failed to remove model:', error)
+            alert('Failed to remove model')
+        } finally {
+            setIsDeleting(false)
+        }
+    }
 
-    const allItems = [...configuredList, ...detectedList];
+    return (
+        <Card className="p-4 hover:bg-muted/50 transition-colors" data-testid="model-card">
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3 flex-1">
+                    <div className="text-2xl">{getProviderIcon(model.provider)}</div>
+                    <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                            <span className="font-medium">{model.name}</span>
+                            {model.isActive && (
+                                <Badge variant="default" className="bg-green-600 text-xs">
+                                    Active
+                                </Badge>
+                            )}
+                            {model.isLocal && (
+                                <Badge variant="secondary" className="text-xs">
+                                    Local
+                                </Badge>
+                            )}
+                        </div>
+                        <div className="text-sm text-muted-foreground mt-0.5">
+                            {model.provider} {model.description && `• ${model.description}`}
+                        </div>
+                    </div>
+                </div>
+                <div className="flex items-center gap-2">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-destructive"
+                        onClick={handleDelete}
+                        disabled={isDeleting}
+                        data-testid="model-remove-button"
+                    >
+                        <TrashIcon className="w-4 h-4" />
+                    </Button>
+                </div>
+            </div>
+        </Card>
+    )
+}
+
+
+
+function LocalModelForm({ onBack, onComplete }: { onBack?: () => void; onComplete: () => void }) {
+    const { refreshModels } = useModelDetector()
+    const [filePath, setFilePath] = useState('')
+    const [fileName, setFileName] = useState('')
+    const [modelName, setModelName] = useState('')
+    const [isImporting, setIsImporting] = useState(false)
+    const [error, setError] = useState('')
+    const [success, setSuccess] = useState(false)
+
+    const handleFileSelect = async () => {
+        // @ts-ignore
+        if (!window.electronAPI?.dialog) return
+
+        try {
+            // @ts-ignore
+            const result = await window.electronAPI.dialog.openFile({
+                title: 'Select Model File',
+                filters: [{ name: 'GGUF Models', extensions: ['gguf'] }],
+            })
+
+            if (!result.canceled && result.filePath) {
+                setFilePath(result.filePath)
+                const name = result.filePath.split(/[/\\]/).pop() || 'model.gguf'
+                setFileName(name)
+                setModelName(name.replace('.gguf', ''))
+                setError('')
+            }
+        } catch (e) {
+            console.error('Failed to select file:', e)
+            setError('Failed to open file dialog')
+        }
+    }
+
+    const handleImport = async () => {
+        if (!filePath) return
+
+        setIsImporting(true)
+        setError('')
+        setSuccess(false)
+
+        try {
+            // @ts-ignore
+            const result = await window.electronAPI.model.import(filePath, {
+                name: modelName,
+                description: 'Imported local model',
+            })
+
+            if (result.success) {
+                setSuccess(true);
+                // Wait for electron-store to persist the data
+                await new Promise(resolve => setTimeout(resolve, 300));
+                // Refresh the models list
+                await refreshModels();
+                // Close the form after showing success message
+                setTimeout(() => {
+                    onComplete();
+                }, 1200);
+            } else {
+                setError(result.error || 'Failed to import model');
+            }
+        } catch (e) {
+            console.error('Import failed:', e)
+            setError(e instanceof Error ? e.message : 'Failed to import model')
+        } finally {
+            setIsImporting(false)
+        }
+    }
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h3 className="text-lg font-medium">Available Models</h3>
-                    <p className="text-sm text-muted-foreground">Manage your AI models and providers</p>
-                </div>
-                <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={detectOllama} disabled={isDetectingOllama}>
-                        <RefreshCwIcon className={cn("w-4 h-4 mr-2", isDetectingOllama && "animate-spin")} />
-                        Refresh
-                    </Button>
-                    <Button onClick={onAddClick}>
-                        <PlusIcon className="w-4 h-4 mr-2" />
-                        Add Model
-                    </Button>
-                </div>
-            </div>
-
-            {/* Test Result */}
-            {testResult && (
-                <Alert variant={testResult.success ? "default" : "destructive"} className="mb-4">
-                    <AlertDescription>
-                        {testResult.success ? 'Provider test successful!' : `Test failed: ${testResult.error}`}
-                    </AlertDescription>
-                </Alert>
-            )}
-
-            <div className="space-y-4">
-                {allItems.length === 0 ? (
-                    <div className="p-8 text-center border-2 border-dashed rounded-xl text-muted-foreground">
-                        No models configured or detected. Click "Add Model" to start.
+            <Card className="p-6">
+                <div className="space-y-4">
+                    <div>
+                        <Label>Model File</Label>
+                        <div
+                            className="mt-2 p-6 border-2 border-dashed rounded-lg text-center cursor-pointer hover:bg-muted/50 transition-colors"
+                            onClick={handleFileSelect}
+                        >
+                            <HardDriveIcon className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                            <p className="font-medium">{fileName || 'Select GGUF File'}</p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                                Click to browse your file system
+                            </p>
+                        </div>
                     </div>
-                ) : (
-                    allItems.map((item) => {
-                        const isConfigured = item.isConfigured;
-                        const config = item.config;
-                        const id = item.id;
-                        const isActive = isConfigured && activeProvider?.type === config.type && activeProvider?.model === config.model;
 
-                        return (
-                            <div key={id} className="flex items-center justify-between p-4 border rounded-lg bg-card hover:bg-muted/50 transition-colors">
-                                <div className="flex items-center gap-4">
-                                    <div className="text-2xl flex-shrink-0 bg-muted p-2 rounded-md">
-                                        {getProviderIcon(config.type)}
-                                    </div>
-                                    <div>
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-medium">{isConfigured ? id : config.model}</span>
-                                            {!isConfigured && <Badge variant="secondary" className="text-xs">Discovered</Badge>}
-                                            {isActive && <Badge variant="default" className="bg-green-600">Active</Badge>}
-                                        </div>
-                                        <div className="text-sm text-muted-foreground flex items-center gap-2">
-                                            <span>{config.type === 'local' ? 'Local GGUF' : config.type}</span>
-                                            {item.source === 'detected' && item.details && (
-                                                <>
-                                                    <span>•</span>
-                                                    <span>{item.details.parameter_size}</span>
-                                                </>
-                                            )}
-                                            {isConfigured && config.model && (
-                                                <>
-                                                    <span>•</span>
-                                                    <span>{config.model}</span>
-                                                </>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
+                    {filePath && (
+                        <div>
+                            <Label>Model Name</Label>
+                            <Input
+                                value={modelName}
+                                onChange={(e) => setModelName(e.target.value)}
+                                placeholder="e.g. Llama 3 8B"
+                                className="mt-2"
+                                data-testid="model-name-input"
+                            />
+                        </div>
+                    )}
 
-                                <div className="flex items-center gap-2">
-                                    {isConfigured ? (
-                                        <>
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() => handleTestProvider(id)}
-                                                disabled={isTesting}
-                                            >
-                                                Test
-                                            </Button>
-                                            {!isActive && (
-                                                <Button
-                                                    variant="secondary"
-                                                    size="sm"
-                                                    onClick={() => handleSetActiveProvider(id)}
-                                                >
-                                                    Set Active
-                                                </Button>
-                                            )}
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                                                onClick={() => handleRemoveProvider(id)}
-                                            >
-                                                Remove
-                                            </Button>
-                                        </>
-                                    ) : (
-                                        <Button
-                                            size="sm"
-                                            onClick={() => handleAddDetectedOllama(detectedList.find(d => d.id === id)!.config.model! as any)}
-                                        >
-                                            Use Model
-                                        </Button>
-                                    )}
-                                </div>
-                            </div>
-                        );
-                    })
+                    {error && (
+                        <Alert className="bg-destructive/10 border-destructive/50">
+                            <AlertCircleIcon className="h-4 w-4 text-destructive" />
+                            <AlertDescription className="text-destructive">
+                                {error}
+                            </AlertDescription>
+                        </Alert>
+                    )}
+
+                    {success && (
+                        <Alert className="bg-green-500/10 border-green-500/50">
+                            <CheckCircleIcon className="h-4 w-4 text-green-500" />
+                            <AlertDescription className="text-green-500">
+                                Model imported successfully!
+                            </AlertDescription>
+                        </Alert>
+                    )}
+                </div>
+            </Card>
+
+            <div className="flex justify-end gap-2">
+                {onBack && (
+                    <Button variant="outline" onClick={onBack} disabled={isImporting} data-testid="cancel-import-button">
+                        Cancel
+                    </Button>
                 )}
+                <Button onClick={handleImport} disabled={!filePath || isImporting || success} data-testid="import-model-button">
+                    {isImporting && <Loader2Icon className="w-4 h-4 mr-2 animate-spin" />}
+                    {success ? 'Imported!' : 'Import Model'}
+                </Button>
             </div>
-
-            {!ollamaAvailable && (
-                <Alert className="mt-6 bg-muted/50 border-none">
-                    <DatabaseIcon className="h-4 w-4" />
-                    <AlertDescription>
-                        Ollama is not running. Start Ollama to auto-detect local models.
-                    </AlertDescription>
-                </Alert>
-            )}
         </div>
     )
 }
 
-function AISettingsAdd({ onCancel, onSave }: { onCancel: () => void, onSave: () => void }) {
-    const { addProvider } = useAI();
-    // Default to 'local' tab as requested
-    const [activeTab, setActiveTab] = useState<'local' | 'api'>('local');
-    const [isLoading, setIsLoading] = useState(false);
-    const [isSaved, setIsSaved] = useState(false);
+function ProviderConfigForm() {
+    const { addProvider } = useAI()
+    const { refreshModels } = useModelDetector()
+    const [providerType, setProviderType] = useState('openai')
+    const [apiKey, setApiKey] = useState('')
+    const [baseUrl, setBaseUrl] = useState('https://api.openai.com/v1')
+    const [isSaving, setIsSaving] = useState(false)
+    const [success, setSuccess] = useState(false)
+    const [error, setError] = useState('')
 
-    // Form state
-    const [selectedProvider, setSelectedProvider] = useState<string>("openai");
-    const [providerName, setProviderName] = useState("");
-    const [apiKey, setApiKey] = useState("");
-    const [baseURL, setBaseURL] = useState("");
-    const [selectedModel, setSelectedModel] = useState("");
-    const [ggufFilePath, setGgufFilePath] = useState("");
-    const [ggufFileName, setGgufFileName] = useState("");
-    const [importError, setImportError] = useState("");
+    const providers = [
+        { value: 'openai', label: 'OpenAI', url: 'https://api.openai.com/v1' },
+        { value: 'anthropic', label: 'Anthropic', url: 'https://api.anthropic.com/v1' },
+        { value: 'google', label: 'Google Gemini', url: 'https://generativelanguage.googleapis.com/v1' },
+        { value: 'mistral', label: 'Mistral AI', url: 'https://api.mistral.ai/v1' },
+        { value: 'openrouter', label: 'OpenRouter', url: 'https://openrouter.ai/api/v1' },
+        { value: 'ollama', label: 'Ollama', url: 'http://localhost:11434' },
+    ]
 
-
-    const handleGGUFFileSelect = async () => {
-        // @ts-ignore
-        if (!window.electronAPI?.dialog) {
-            setImportError("File dialog not available");
-            return;
+    // Auto-set base URL when provider changes
+    useEffect(() => {
+        const provider = providers.find(p => p.value === providerType)
+        if (provider) {
+            setBaseUrl(provider.url)
         }
-        try {
-            // @ts-ignore
-            const result = await window.electronAPI.dialog.openFile({
-                title: "Select GGUF Model File",
-                filters: [{ name: "GGUF Models", extensions: ["gguf"] }],
-            });
-            if (!result.canceled && result.filePath) {
-                setGgufFilePath(result.filePath);
-                const fileName = result.filePath.split(/[/\\]/).pop() || "model.gguf";
-                setGgufFileName(fileName);
-                setProviderName(fileName.replace(".gguf", ""));
-                setImportError("");
-            }
-        } catch (e) {
-            setImportError("Failed to select file");
-        }
-    };
+    }, [providerType])
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsLoading(true);
-        setImportError("");
+    const handleSave = async () => {
+        setIsSaving(true)
+        setSuccess(false)
+        setError('')
 
         try {
-            const id = `${activeTab === 'local' ? 'local' : selectedProvider}-${Date.now()}`;
-            let config: ProviderConfig;
-
-            if (activeTab === 'local') {
-                if (!ggufFilePath) throw new Error("Please select a GGUF file");
-
-                // @ts-ignore
-                const importResult = await window.electronAPI.model.import(ggufFilePath, {
-                    name: providerName,
-                    description: "Imported GGUF"
-                });
-                if (!importResult.success) throw new Error(importResult.error || "Import failed");
-
-                config = {
-                    type: "local",
-                    modelPath: ggufFilePath,
-                    model: providerName,
-                    contextSize: 2048,
-                };
-            } else {
-                if (!apiKey && selectedProvider !== 'custom' && selectedProvider !== 'ollama') throw new Error("API Key is required");
-
-                config = {
-                    type: selectedProvider as ProviderType,
-                    apiKey,
-                    baseURL: baseURL || undefined,
-                    model: selectedModel || undefined,
-                };
-
-                // Special handling for manual Ollama
-                if (selectedProvider === 'ollama') {
-                    config.baseURL = baseURL || 'http://localhost:11434';
-                }
+            // Create provider config
+            const config: ProviderConfig = {
+                type: providerType as ProviderType,
+                apiKey: providerType === 'ollama' ? undefined : apiKey,
+                baseURL: baseUrl,
+                model: '', // Will be set by the provider
             }
 
-            await addProvider(id, config);
-            setIsSaved(true);
+            // Generate unique provider ID
+            const providerId = `${providerType}-${Date.now()}`
+
+            // Add provider using AI context
+            await addProvider(providerId, config)
+
+            // Refresh models to pick up the new provider
+            await refreshModels()
+
+            setSuccess(true)
             setTimeout(() => {
-                onSave();
-            }, 800);
-        } catch (err: any) {
-            setImportError(err.message);
+                setSuccess(false)
+                // Clear form
+                setApiKey('')
+            }, 2000)
+        } catch (err) {
+            console.error('Failed to save provider config:', err)
+            setError(err instanceof Error ? err.message : 'Failed to save provider configuration')
         } finally {
-            setIsLoading(false);
+            setIsSaving(false)
         }
-    };
+    }
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center gap-4">
-                <Button variant="ghost" size="icon" onClick={onCancel}>
-                    <ArrowLeftIcon className="w-5 h-5" />
-                </Button>
-                <h2 className="text-xl font-semibold">Add New Model</h2>
-            </div>
-
-            <div className="max-w-2xl mx-auto space-y-6">
-                {/* Tab Selection */}
-                <div className="flex bg-muted p-1 rounded-lg">
-                    <button
-                        onClick={() => setActiveTab('local')}
-                        className={cn(
-                            "flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium rounded-md transition-all",
-                            activeTab === 'local' ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:bg-background/50"
-                        )}
-                    >
-                        <HardDriveIcon className="w-4 h-4" /> Local Model (GGUF)
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('api')}
-                        className={cn(
-                            "flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium rounded-md transition-all",
-                            activeTab === 'api' ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:bg-background/50"
-                        )}
-                    >
-                        <ServerIcon className="w-4 h-4" /> Cloud/API Provider
-                    </button>
+        <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+                <div>
+                    <Label>Provider</Label>
+                    <Select value={providerType} onValueChange={setProviderType}>
+                        <SelectTrigger className="mt-2">
+                            <SelectValue placeholder="Select a provider" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {providers.map(provider => (
+                                <SelectItem key={provider.value} value={provider.value}>
+                                    {provider.label}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                 </div>
 
-                <Card className="border-border/50 shadow-sm">
-                    <CardHeader>
-                        <CardTitle>
-                            {activeTab === 'local' ? 'Import Local GGUF Model' : 'Connect Provider'}
-                        </CardTitle>
-                        <CardDescription>
-                            {activeTab === 'local'
-                                ? 'Run LLMs locally on your machine for privacy and offline capability.'
-                                : 'Connect to external AI providers like OpenAI, Anthropic, or others.'}
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            {importError && (
-                                <Alert variant="destructive" className="py-2">
-                                    <AlertDescription>{importError}</AlertDescription>
-                                </Alert>
-                            )}
-                            {isSaved && (
-                                <Alert className="py-2 border-green-200 bg-green-50 text-green-800">
-                                    <CheckIcon className="w-4 h-4 mr-2" />
-                                    <AlertDescription>Saved!</AlertDescription>
-                                </Alert>
-                            )}
+                <div>
+                    <Label>Base URL (Optional)</Label>
+                    <Input
+                        value={baseUrl}
+                        onChange={(e) => setBaseUrl(e.target.value)}
+                        placeholder={providerType === 'ollama' ? 'http://localhost:11434' : 'https://api.example.com'}
+                        className="mt-2"
+                    />
+                </div>
+            </div>
 
-                            {activeTab === 'local' && (
-                                <>
-                                    <div className="p-6 bg-muted/30 border-2 border-dashed rounded-lg text-center hover:bg-muted/50 transition-colors cursor-pointer" onClick={handleGGUFFileSelect}>
-                                        <div className="flex flex-col items-center gap-2">
-                                            <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center text-primary">
-                                                <HardDriveIcon className="h-5 w-5" />
-                                            </div>
-                                            <div>
-                                                <div className="font-medium text-foreground">{ggufFileName || "Select GGUF File"}</div>
-                                                <div className="text-xs text-muted-foreground mt-1">Click to browse your file system</div>
-                                            </div>
-                                        </div>
-                                    </div>
+            <div>
+                <Label>API Key</Label>
+                <Input
+                    type="password"
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    placeholder={providerType === 'ollama' ? 'Not required for Ollama' : 'sk-...'}
+                    disabled={providerType === 'ollama'}
+                    className="mt-2"
+                />
+            </div>
 
-                                    <div className="space-y-2">
-                                        <Label>Display Name</Label>
-                                        <Input
-                                            value={providerName}
-                                            onChange={e => setProviderName(e.target.value)}
-                                            placeholder="e.g. Llama 3 8B"
-                                            required
-                                        />
-                                    </div>
-                                </>
-                            )}
+            {error && (
+                <Alert className="bg-destructive/10 border-destructive/50">
+                    <AlertCircleIcon className="h-4 w-4 text-destructive" />
+                    <AlertDescription className="text-destructive">
+                        {error}
+                    </AlertDescription>
+                </Alert>
+            )}
 
-                            {activeTab === 'api' && (
-                                <>
-                                    <div className="space-y-2">
-                                        <Label>Provider</Label>
-                                        <Select value={selectedProvider} onValueChange={setSelectedProvider}>
-                                            <SelectTrigger>
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {PROVIDER_OPTIONS.map(opt => (
-                                                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
+            {success && (
+                <Alert className="bg-green-500/10 border-green-500/50">
+                    <CheckCircleIcon className="h-4 w-4 text-green-500" />
+                    <AlertDescription className="text-green-500">
+                        Provider configuration saved successfully!
+                    </AlertDescription>
+                </Alert>
+            )}
 
-                                    <div className="space-y-2">
-                                        <Label>API Key</Label>
-                                        <Input
-                                            type="password"
-                                            value={apiKey}
-                                            onChange={e => setApiKey(e.target.value)}
-                                            placeholder={selectedProvider === 'ollama' ? "Not required for Ollama" : "sk-..."}
-                                            disabled={selectedProvider === 'ollama'}
-                                        />
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label>Model ID (Optional)</Label>
-                                        <Input
-                                            value={selectedModel}
-                                            onChange={e => setSelectedModel(e.target.value)}
-                                            placeholder="e.g. gpt-4-turbo"
-                                        />
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label className="text-muted-foreground font-normal">Base URL (Advanced)</Label>
-                                        <Input
-                                            value={baseURL}
-                                            onChange={e => setBaseURL(e.target.value)}
-                                            placeholder={selectedProvider === 'ollama' ? "http://localhost:11434" : "https://api.example.com/v1"}
-                                        />
-                                    </div>
-                                </>
-                            )}
-
-                            <Button type="submit" className="w-full mt-4" disabled={isLoading}>
-                                {isLoading ? <Loader2Icon className="w-4 h-4 animate-spin mr-2" /> : null}
-                                {isLoading ? "Saving..." : "Save Model"}
-                            </Button>
-                        </form>
-                    </CardContent>
-                </Card>
+            <div className="flex justify-end">
+                <Button onClick={handleSave} disabled={isSaving || (!apiKey && providerType !== 'ollama')}>
+                    {isSaving && <Loader2Icon className="w-4 h-4 mr-2 animate-spin" />}
+                    {isSaving ? 'Saving...' : 'Save Configuration'}
+                </Button>
             </div>
         </div>
     )

@@ -38,24 +38,28 @@ export const NetworkMap = ({ topology = 'ring' }: NetworkMapProps) => {
         id: pc.id,
         data: {
           label: (
-            <div className="flex flex-col items-center gap-1">
-              <Monitor className="w-6 h-6" />
-              <span className="text-xs font-medium">{pc.hostname}</span>
+            <div className="flex flex-col items-center gap-2 p-2">
+              <div className="p-2 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-lg border border-blue-500/30">
+                <Monitor className="w-5 h-5 text-blue-400" />
+              </div>
+              <span className="text-xs font-semibold text-white">{pc.hostname}</span>
+              <span className="text-[10px] text-gray-400">PC-{pc.id}</span>
             </div>
           )
         },
         position,
         style: {
-          padding: 8,
-          borderRadius: 0,
-          borderWidth: 1,
+          padding: 0,
+          borderRadius: '12px',
+          borderWidth: 2,
           borderStyle: 'solid',
-          borderColor: isSelected ? '#3b82f6' : '#2a2a2a',
-          backgroundColor: isSelected ? '#3b82f620' : '#121212',
+          borderColor: isSelected ? '#3b82f6' : '#374151',
+          backgroundColor: isSelected ? '#1e40af20' : '#1f2937',
           color: '#e5e5e5',
           boxShadow: isSelected
-            ? '0 0 0 1px #3b82f6'
-            : 'none',
+            ? '0 0 20px rgba(59, 130, 246, 0.5), 0 0 0 2px #3b82f6'
+            : '0 4px 6px rgba(0, 0, 0, 0.3)',
+          transition: 'all 0.3s ease',
         },
       } satisfies Node;
     });
@@ -71,7 +75,11 @@ export const NetworkMap = ({ topology = 'ring' }: NetworkMapProps) => {
       source: conn.from,
       target: conn.to,
       type: 'smoothstep',
-      style: { stroke: '#4b5563' },
+      style: { 
+        stroke: topology === 'mesh' ? '#10b981' : topology === 'star' ? '#f59e0b' : topology === 'ring' ? '#8b5cf6' : topology === 'tree' ? '#ef4444' : '#60a5fa', 
+        strokeWidth: topology === 'mesh' ? 1 : 2,
+        strokeDasharray: topology === 'mesh' ? '3,3' : topology === 'bus' ? '8,4' : 'none'
+      },
       animated: topology === 'mesh',
     } satisfies Edge));
   }, [pcIds, topology]);
@@ -106,15 +114,31 @@ export const NetworkMap = ({ topology = 'ring' }: NetworkMapProps) => {
           onEdgesChange={onEdgesChange}
           onNodeClick={onNodeClick}
           fitView
-          fitViewOptions={{ padding: 0.2 }}
+          fitViewOptions={{ padding: 0.3, minZoom: 0.5, maxZoom: 1.5 }}
         >
           <MiniMap
-            nodeStrokeColor="#2a2a2a" // dark-border
-            nodeColor="#121212" // dark-surface
-            maskColor="rgba(10,10,10,0.7)" // dark-bg
+            nodeStrokeColor="#3b82f6"
+            nodeColor="#1f2937"
+            maskColor="rgba(17, 24, 39, 0.8)"
+            position="top-right"
+            style={{
+              backgroundColor: 'rgba(31, 41, 55, 0.9)',
+              border: '1px solid #374151'
+            }}
           />
-          <Controls />
-          <Background color="#2a2a2a" gap={16} />
+          <Controls 
+            style={{
+              backgroundColor: 'rgba(31, 41, 55, 0.9)',
+              border: '1px solid #374151',
+              borderRadius: '8px'
+            }}
+          />
+          <Background 
+            color="#374151" 
+            gap={20} 
+            size={1}
+            variant="dots"
+          />
         </ReactFlow>
       </div>
     </div>

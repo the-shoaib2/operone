@@ -9,12 +9,12 @@ export class TopologyManager {
     static calculatePositions(
         pcCount: number,
         topology: TopologyType,
-        width: number = 600,
-        height: number = 400
+        width: number = 800,
+        height: number = 600
     ): { x: number; y: number }[] {
         const centerX = width / 2;
         const centerY = height / 2;
-        const radius = Math.min(width, height) * 0.35;
+        const radius = Math.min(width, height) * 0.4;
 
         switch (topology) {
             case 'ring':
@@ -143,19 +143,29 @@ export class TopologyManager {
     }
 
     private static ringConnections(pcIds: string[]): Connection[] {
-        return pcIds.map((id, i) => ({
-            from: id,
-            to: pcIds[(i + 1) % pcIds.length],
-        }));
+        const connections: Connection[] = [];
+        for (let i = 0; i < pcIds.length; i++) {
+            const nextIndex = (i + 1) % pcIds.length;
+            connections.push({ from: pcIds[i], to: pcIds[nextIndex] });
+        }
+        return connections;
     }
 
     private static starConnections(pcIds: string[]): Connection[] {
-        const hub = pcIds[0];
-        return pcIds.slice(1).map(id => ({ from: hub, to: id }));
+        const connections: Connection[] = [];
+        if (pcIds.length > 0) {
+            const hub = pcIds[0];
+            // Connect hub to all other nodes
+            for (let i = 1; i < pcIds.length; i++) {
+                connections.push({ from: hub, to: pcIds[i] });
+            }
+        }
+        return connections;
     }
 
     private static meshConnections(pcIds: string[]): Connection[] {
         const connections: Connection[] = [];
+        // Full mesh: every node connects to every other node
         for (let i = 0; i < pcIds.length; i++) {
             for (let j = i + 1; j < pcIds.length; j++) {
                 connections.push({ from: pcIds[i], to: pcIds[j] });
@@ -166,6 +176,7 @@ export class TopologyManager {
 
     private static busConnections(pcIds: string[]): Connection[] {
         const connections: Connection[] = [];
+        // Linear bus topology: each node connects to the next in sequence
         for (let i = 0; i < pcIds.length - 1; i++) {
             connections.push({ from: pcIds[i], to: pcIds[i + 1] });
         }
@@ -174,6 +185,7 @@ export class TopologyManager {
 
     private static treeConnections(pcIds: string[]): Connection[] {
         const connections: Connection[] = [];
+        // Binary tree structure: parent connects to children
         for (let i = 0; i < pcIds.length; i++) {
             const leftChild = 2 * i + 1;
             const rightChild = 2 * i + 2;
