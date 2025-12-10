@@ -1,5 +1,6 @@
 import { EventEmitter } from 'events';
 import { ProcessManager } from '../os/ProcessManager';
+import { AITask, TaskStep, TaskStorage } from '@repo/types';
 
 /**
  * Task priority levels
@@ -45,18 +46,116 @@ export interface Task {
  */
 export class TaskOrchestrator extends EventEmitter {
   private tasks: Map<string, Task>;
+  private aiTasks: Map<string, AITask>;
   private queue: Task[];
   private running: Set<string>;
   private maxConcurrent: number;
   private processManager: ProcessManager;
+  private storage?: TaskStorage;
+  private toolExecutor?: (tool: string, args: any, stepId?: string) => Promise<any>;
 
-  constructor(maxConcurrent: number = 5) {
+  constructor(maxConcurrent: number = 5, storage?: TaskStorage) {
     super();
     this.tasks = new Map();
+    this.aiTasks = new Map();
     this.queue = [];
     this.running = new Set();
     this.maxConcurrent = maxConcurrent;
     this.processManager = new ProcessManager();
+    this.storage = storage;
+  }
+
+  setToolExecutor(executor: (tool: string, args: any, stepId?: string) => Promise<any>) {
+    this.toolExecutor = executor;
+  }
+
+  /**
+   * Submit an AI Task for execution
+   */
+  async submitAITask(task: AITask): Promise<void> {
+    this.aiTasks.set(task.id, task);
+    
+    // Persist initial state
+    if (this.storage) {
+      await this.storage.saveTask(task);
+    }
+    
+    this.emit('aitask:created', task);
+
+    // Create wrapper task for execution
+    const wrapperTask: Omit<Task, 'status' | 'createdAt'> = {
+      id: task.id, // Use same ID or derived
+      name: `AI Task: ${task.prompt.substring(0, 30)}...`,
+      priority: TaskPriority.NORMAL,
+      execute: async () => this.executeAITaskSteps(task)
+    };
+
+    this.addTask(wrapperTask);
+  }
+
+  private async executeAITaskSteps(task: AITask): Promise<any> {
+    if (!this.toolExecutor) {
+      throw new Error('Tool executor not configured for AI tasks');
+    }
+
+    if (this.storage) {
+        await this.storage.updateTaskStatus(task.id, 'running');
+    }
+    task.status = 'running';
+    this.emit('aitask:updated', task);
+
+    const results: any[] = [];
+
+    for (const step of task.steps) {
+      if (step.status === 'completed') continue; // Skip already completed steps if resuming
+      
+      try {
+        // Update step status
+        step.status = 'running';
+        step.startedAt = Date.now();
+        task.currentStepId = step.id;
+        
+        if (this.storage) {
+            await this.storage.updateStepStatus(task.id, step.id, 'running');
+        }
+        this.emit('aitask:step-started', { taskId: task.id, step });
+
+        // Execute tool
+        const result = await this.toolExecutor(step.tool, step.args, step.id);
+        
+        // Complete step
+        step.status = 'completed';
+        step.result = result;
+        step.completedAt = Date.now();
+        results.push(result);
+
+        if (this.storage) {
+            await this.storage.updateStepStatus(task.id, step.id, 'completed', result);
+        }
+        this.emit('aitask:step-completed', { taskId: task.id, step, result });
+      } catch (error: any) {
+        step.status = 'failed';
+        step.error = error.message;
+        step.completedAt = Date.now();
+        task.status = 'failed';
+        
+        if (this.storage) {
+            await this.storage.updateStepStatus(task.id, step.id, 'failed', undefined, error.message);
+            await this.storage.updateTaskStatus(task.id, 'failed');
+        }
+        this.emit('aitask:step-failed', { taskId: task.id, step, error });
+        this.emit('aitask:failed', { taskId: task.id, error });
+        
+        throw error; // Stop execution
+      }
+    }
+
+    task.status = 'completed';
+    if (this.storage) {
+        await this.storage.updateTaskStatus(task.id, 'completed');
+    }
+    this.emit('aitask:completed', task);
+    return results;
   }
 
   /**
@@ -185,7 +284,8 @@ export class TaskOrchestrator extends EventEmitter {
     }
 
     if (task.status === TaskStatus.RUNNING) {
-      throw new Error(`Cannot cancel running task ${taskId}`);
+      // For AI tasks, we might want to try to cancel the current step too
+      // throw new Error(`Cannot cancel running task ${taskId}`);
     }
 
     task.status = TaskStatus.CANCELLED;
@@ -204,6 +304,10 @@ export class TaskOrchestrator extends EventEmitter {
    */
   getTask(taskId: string): Task | undefined {
     return this.tasks.get(taskId);
+  }
+  
+  getAITask(taskId: string): AITask | undefined {
+    return this.aiTasks.get(taskId);
   }
 
   /**
@@ -262,6 +366,7 @@ export class TaskOrchestrator extends EventEmitter {
   getStats() {
     return {
       total: this.tasks.size,
+      aiTasks: this.aiTasks.size,
       pending: this.getTasksByStatus(TaskStatus.PENDING).length,
       queued: this.queue.length,
       running: this.running.size,

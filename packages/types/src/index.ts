@@ -29,6 +29,7 @@ export type ProviderType =
   | 'openrouter' 
   | 'google' 
   | 'mistral' 
+  | 'local'
   | 'custom';
 
 export interface BaseProviderConfig {
@@ -67,6 +68,14 @@ export interface MistralConfig extends BaseProviderConfig {
   apiKey: string;
 }
 
+export interface LocalConfig extends BaseProviderConfig {
+  type: 'local';
+  modelPath: string;
+  contextSize?: number;
+  threads?: number;
+  gpuLayers?: number;
+}
+
 export interface CustomConfig extends BaseProviderConfig {
   type: 'custom';
   baseURL: string;
@@ -80,6 +89,7 @@ export type ProviderConfig =
   | OpenRouterConfig 
   | GoogleConfig 
   | MistralConfig 
+  | LocalConfig
   | CustomConfig;
 
 export interface ModelInfo {
@@ -89,6 +99,18 @@ export interface ModelInfo {
   contextWindow?: number;
   maxTokens?: number;
   description?: string;
+}
+
+export interface GGUFModelMetadata {
+  id: string;
+  name: string;
+  filePath: string;
+  fileSize: number;
+  importedAt: Date;
+  description?: string;
+  contextSize?: number;
+  parameterCount?: string;
+  quantization?: string;
 }
 
 export interface GeneratedImage {
@@ -163,4 +185,36 @@ export interface Chat {
   createdAt: Date;
   updatedAt: Date;
   messages: ChatMessage[];
+}
+
+// Task Tracking Types
+export interface TaskStep {
+  id: string;
+  description: string;
+  tool: string;
+  args: Record<string, unknown>;
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  result?: unknown;
+  error?: string;
+  startedAt?: number;
+  completedAt?: number;
+}
+
+export interface AITask {
+  id: string;
+  prompt: string;
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  steps: TaskStep[];
+  currentStepId?: string;
+  createdAt: number;
+  updatedAt: number;
+  metadata?: Record<string, unknown>;
+}
+
+export interface TaskStorage {
+  saveTask(task: AITask): Promise<void>;
+  getTask(id: string): Promise<AITask | undefined>;
+  updateTaskStatus(id: string, status: AITask['status']): Promise<void>;
+  updateStepStatus(taskId: string, stepId: string, status: TaskStep['status'], result?: unknown, error?: string): Promise<void>;
+  listTasks(limit?: number): Promise<AITask[]>;
 }

@@ -1,5 +1,6 @@
 import * as React from "react"
 import { useCallback, useMemo, useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 
 import {
   PromptInput,
@@ -44,6 +45,11 @@ export const ChatPromptInput = React.memo(function ChatPromptInput({
   onFocus,
 }: ChatPromptInputProps) {
   const { availableModels } = useModelDetector();
+  const navigate = useNavigate();
+
+  const handleAddModel = useCallback(() => {
+    navigate('/settings/models/add');
+  }, [navigate]);
 
   const handleSubmit = useCallback((message: { text: string; files: any[] }, event: React.FormEvent<HTMLFormElement>) => {
     onSubmit(message, event);
@@ -60,26 +66,26 @@ export const ChatPromptInput = React.memo(function ChatPromptInput({
       let category: ModelCategory = "text";
       const name = model.name?.toLowerCase() || model.id?.toLowerCase() || "";
       const description = model.description?.toLowerCase() || "";
-      
-      if (name.includes("dall-e") || name.includes("midjourney") || name.includes("stable diffusion") || 
-          name.includes("image") || description.includes("image")) {
+
+      if (name.includes("dall-e") || name.includes("midjourney") || name.includes("stable diffusion") ||
+        name.includes("image") || description.includes("image")) {
         category = "image";
-      } else if (name.includes("whisper") || name.includes("tts") || name.includes("audio") || 
-                 description.includes("audio") || description.includes("speech")) {
+      } else if (name.includes("whisper") || name.includes("tts") || name.includes("audio") ||
+        description.includes("audio") || description.includes("speech")) {
         category = "audio";
       } else if (name.includes("video") || description.includes("video")) {
         category = "video";
-      } else if (name.includes("gpt-4") || name.includes("claude") || name.includes("gemini") || 
-                 name.includes("multimodal") || description.includes("vision") || description.includes("image analysis")) {
+      } else if (name.includes("gpt-4") || name.includes("claude") || name.includes("gemini") ||
+        name.includes("multimodal") || description.includes("vision") || description.includes("image analysis")) {
         category = "multimodal";
-      } else if (name.includes("codex") || name.includes("code") || name.includes("copilot") || 
-                 description.includes("code") || description.includes("programming")) {
+      } else if (name.includes("codex") || name.includes("code") || name.includes("copilot") ||
+        description.includes("code") || description.includes("programming")) {
         category = "code";
       }
-      
+
       const isPremium = model.provider !== 'ollama';
       const isNew = model.isNew || false;
-      
+
       return {
         id: model.id,
         name: model.name || model.id,
@@ -109,6 +115,7 @@ export const ChatPromptInput = React.memo(function ChatPromptInput({
             models={transformedModels}
             selectedModel={selectedModel}
             onModelChange={setSelectedModel}
+            onAddModel={handleAddModel}
             maxContentHeight="200px"
             maxContentWidth="200px"
             showCategories={true}

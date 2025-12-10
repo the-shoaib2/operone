@@ -203,6 +203,9 @@ export const ChatLayout = React.memo(function ChatLayout({
         if (defaultModel) {
           setSelectedModel(defaultModel.id);
         }
+      } else {
+        // If no Ollama models, select the first available model (e.g. from GGUF / Cloud)
+        setSelectedModel(availableModels[0].id);
       }
     }
   }, [selectedModel, availableModels]);

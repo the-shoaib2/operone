@@ -15,6 +15,7 @@ import type {
   MistralConfig,
   CustomConfig
 } from '@repo/types';
+import { custom } from 'zod';
 
 /**
  * Model Provider Factory
@@ -212,18 +213,7 @@ export class ModelRegistry {
       { id: 'mistral-medium', name: 'Mistral Medium', provider: 'mistral', contextWindow: 32000, description: 'Balanced model' },
       { id: 'open-mixtral-8x22b', name: 'Mixtral 8x22B', provider: 'mistral', contextWindow: 64000, description: 'Open source powerhouse' },
     ],
-    ollama: [
-      // Default models - will be updated dynamically when Ollama is detected
-      { id: 'llama3.2', name: 'Llama 3.2', provider: 'ollama', description: 'Latest Llama model' },
-      { id: 'llama3.1', name: 'Llama 3.1', provider: 'ollama', description: 'Previous Llama version' },
-      { id: 'mistral', name: 'Mistral', provider: 'ollama', description: 'Mistral 7B' },
-      { id: 'codellama', name: 'Code Llama', provider: 'ollama', description: 'Specialized for code' },
-      { id: 'phi3', name: 'Phi-3', provider: 'ollama', description: 'Microsoft Phi-3' },
-      { id: 'qwen2.5', name: 'Qwen 2.5', provider: 'ollama', description: 'Alibaba Qwen' },
-      { id: 'gemma2', name: 'Gemma 2', provider: 'ollama', description: 'Google Gemma 2' },
-      { id: 'neural-chat', name: 'Neural Chat', provider: 'ollama', description: 'Intel Neural Chat' },
-      { id: 'starling-lm', name: 'Starling LM', provider: 'ollama', description: 'High quality open model' },
-    ],
+    ollama: [],
     openrouter: [
       { id: 'anthropic/claude-3.5-sonnet', name: 'Claude 3.5 Sonnet', provider: 'openrouter', description: 'Via OpenRouter' },
       { id: 'openai/gpt-4o', name: 'GPT-4o', provider: 'openrouter', description: 'Via OpenRouter' },
@@ -234,7 +224,7 @@ export class ModelRegistry {
       { id: 'nvidia/llama-3.1-nemotron-70b-instruct', name: 'Llama 3.1 Nemotron', provider: 'openrouter', description: 'NVIDIA optimized' },
       { id: 'qwen/qwen-2.5-72b-instruct', name: 'Qwen 2.5 72B', provider: 'openrouter', description: 'Top tier open model' },
     ],
-    custom: [],
+    local: [],
   };
 
   /**

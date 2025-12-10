@@ -4,7 +4,7 @@ import { OllamaDetector, type OllamaModel } from '../utils/ollama-detector';
 export interface ModelInfo {
   id: string;
   name: string;
-  provider: 'ollama' | 'openai' | 'anthropic' | 'google' | 'custom';
+  provider: 'ollama' | 'openai' | 'anthropic' | 'google' | 'custom' | 'local';
   description?: string;
   contextLength?: number;
   isLocal?: boolean;
@@ -18,16 +18,16 @@ interface ModelDetectorContextType {
   availableModels: ModelInfo[];
   isLoading: boolean;
   error: string | null;
-  
+
   // Ollama specific
   isOllamaAvailable: boolean;
   ollamaModels: OllamaModel[];
-  
+
   // Authentication (placeholder for future implementation)
   authenticateModel: (modelId: string, credentials: any) => Promise<boolean>;
   deauthenticateModel: (modelId: string) => Promise<void>;
   getAuthStatus: (modelId: string) => 'authenticated' | 'pending' | 'failed' | 'not_required';
-  
+
   // Actions
   refreshModels: () => Promise<void>;
   detectOllama: () => Promise<boolean>;
@@ -41,7 +41,7 @@ export function ModelDetectorProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const [isOllamaAvailable, setIsOllamaAvailable] = useState(false);
   const [ollamaModels, setOllamaModels] = useState<OllamaModel[]>([]);
-  
+
   const ollamaDetector = OllamaDetector.getInstance();
 
   // Detect Ollama models
@@ -49,11 +49,11 @@ export function ModelDetectorProvider({ children }: { children: ReactNode }) {
     try {
       const available = await ollamaDetector.checkAvailability();
       setIsOllamaAvailable(available);
-      
+
       if (available) {
         const models = await ollamaDetector.getAvailableModels();
         setOllamaModels(models);
-        
+
         // Convert Ollama models to ModelInfo format
         const modelInfos: ModelInfo[] = models.map(model => ({
           id: `ollama:${model.name}`,
@@ -66,12 +66,12 @@ export function ModelDetectorProvider({ children }: { children: ReactNode }) {
           requiresAuth: false,
           authStatus: 'not_required' as const,
         }));
-        
+
         return modelInfos;
       }
       return [];
     } catch (err) {
-      console.error('Failed to detect Ollama models:', err);
+      // Silently handle Ollama detection errors
       setIsOllamaAvailable(false);
       setOllamaModels([]);
       return [];
@@ -82,49 +82,15 @@ export function ModelDetectorProvider({ children }: { children: ReactNode }) {
   const detectAllModels = async () => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const models: ModelInfo[] = [];
-      
+
       // Detect Ollama models
       const ollamaModelInfos = await detectOllamaModels();
       models.push(...ollamaModelInfos);
-      
-      // Add default cloud models (placeholder for future auth implementation)
-      const defaultCloudModels: ModelInfo[] = [
-        {
-          id: 'openai:gpt-4o',
-          name: 'GPT-4o',
-          provider: 'openai',
-          description: 'OpenAI\'s most capable model',
-          contextLength: 128000,
-          isLocal: false,
-          requiresAuth: true,
-          authStatus: 'pending' as const,
-        },
-        {
-          id: 'anthropic:claude-3-5-sonnet-20241022',
-          name: 'Claude 3.5 Sonnet',
-          provider: 'anthropic',
-          description: 'Anthropic\'s most capable model',
-          contextLength: 200000,
-          isLocal: false,
-          requiresAuth: true,
-          authStatus: 'pending' as const,
-        },
-        {
-          id: 'google:gemini-pro',
-          name: 'Gemini Pro',
-          provider: 'google',
-          description: 'Google\'s conversational AI model',
-          contextLength: 32768,
-          isLocal: false,
-          requiresAuth: true,
-          authStatus: 'pending' as const,
-        },
-      ];
-      
-      models.push(...defaultCloudModels);
+
+      // Note: Cloud provider models will be added when user configures them with API keys
       setAvailableModels(models);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to detect models');
@@ -149,26 +115,26 @@ export function ModelDetectorProvider({ children }: { children: ReactNode }) {
   const authenticateModel = async (modelId: string, credentials: any): Promise<boolean> => {
     // TODO: Implement actual authentication logic
     console.log(`Authenticating model ${modelId} with credentials:`, credentials);
-    
+
     // Simulate authentication
-    setAvailableModels(prev => 
-      prev.map(model => 
-        model.id === modelId 
+    setAvailableModels(prev =>
+      prev.map(model =>
+        model.id === modelId
           ? { ...model, authStatus: 'authenticated' as const, isActive: true }
           : model
       )
     );
-    
+
     return true;
   };
 
   const deauthenticateModel = async (modelId: string): Promise<void> => {
     // TODO: Implement actual deauthentication logic
     console.log(`Deauthenticating model ${modelId}`);
-    
-    setAvailableModels(prev => 
-      prev.map(model => 
-        model.id === modelId 
+
+    setAvailableModels(prev =>
+      prev.map(model =>
+        model.id === modelId
           ? { ...model, authStatus: 'pending' as const, isActive: false }
           : model
       )
@@ -183,7 +149,7 @@ export function ModelDetectorProvider({ children }: { children: ReactNode }) {
   // Initial detection
   useEffect(() => {
     detectAllModels();
-    
+
     // Set up periodic refresh for Ollama models
     const interval = setInterval(() => {
       detectOllamaModels().then(modelInfos => {
@@ -194,7 +160,7 @@ export function ModelDetectorProvider({ children }: { children: ReactNode }) {
         });
       });
     }, 30000); // Refresh every 30 seconds
-    
+
     return () => clearInterval(interval);
   }, []);
 

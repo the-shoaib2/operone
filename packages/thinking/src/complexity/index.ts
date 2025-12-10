@@ -20,18 +20,19 @@ interface ComplexityConfig {
 
 const DEFAULT_CONFIG: ComplexityConfig = {
   simpleThreshold: 0.3,
-  complexThreshold: 0.7,
+  complexThreshold: 0.6, // Lowered from 0.7 to better catch multi-step queries
   maxSimpleLength: 100,
   complexKeywords: [
     'analyze', 'search', 'automate', 'deploy', 'refactor', 'optimize',
     'implement', 'create', 'build', 'setup', 'configure', 'integrate',
     'migrate', 'transform', 'process', 'generate', 'compile', 'test',
     'debug', 'profile', 'benchmark', 'monitor', 'track', 'sync',
+    'read', 'write', 'delete', 'execute', 'fetch', // Added file/network operations
   ],
   multiStepIndicators: [
     'and then', 'after that', 'next', 'finally', 'first', 'second',
     'then', 'also', 'additionally', 'furthermore', 'moreover',
-    'all', 'every', 'each', 'multiple', 'several',
+    'all', 'every', 'each', 'multiple', 'several', 'and',
   ],
 };
 
@@ -61,7 +62,7 @@ export class ComplexityDetector {
       normalized.includes(keyword)
     );
     if (hasComplexKeywords) {
-      score += 0.3;
+      score += 0.35; // Increased from 0.3
       reasons.push('Contains complex action keywords');
     }
 
@@ -70,7 +71,7 @@ export class ComplexityDetector {
       normalized.includes(indicator)
     );
     if (hasMultiStepIndicators) {
-      score += 0.25;
+      score += 0.3; // Increased from 0.25
       reasons.push('Contains multi-step indicators');
     }
 

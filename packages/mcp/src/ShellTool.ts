@@ -1,6 +1,7 @@
 import { MCPTool } from '@repo/types';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import { permissionManager } from './PermissionManager';
 
 const execAsync = promisify(exec);
 
@@ -20,51 +21,15 @@ export class ShellTool implements MCPTool {
   public readonly name = 'shell';
   public readonly description = 'Execute safe shell commands with restrictions';
 
-  private readonly allowedCommands: string[] = [
-    'ls', 'pwd', 'echo', 'cat', 'grep', 'find', 'wc', 'head', 'tail',
-    'git', 'npm', 'node', 'python', 'python3'
-  ];
-
-  private readonly blockedPatterns: RegExp[] = [
-    /rm\s+-rf/i,
-    /sudo/i,
-    /chmod/i,
-    /chown/i,
-    />.*\/dev\//i,  // Prevent writing to device files
-    /\|\s*sh/i,     // Prevent piping to shell
-  ];
-
-  constructor(allowedCommands?: string[]) {
-    if (allowedCommands) {
-      this.allowedCommands = allowedCommands;
-    }
-  }
-
-  /**
-   * Check if command is safe to execute
-   */
-  private isCommandSafe(command: string): boolean {
-    // Check for blocked patterns
-    if (this.blockedPatterns.some(pattern => pattern.test(command))) {
-      return false;
-    }
-
-    // Extract the base command
-    const baseCommand = command.trim().split(' ')[0];
-    
-    // Check if base command is in allowed list
-    if (!baseCommand) return false;
-    
-    return this.allowedCommands.some(allowed => 
-      baseCommand === allowed || baseCommand.endsWith(`/${allowed}`)
-    );
-  }
+  constructor() {}
 
   public async execute(args: Record<string, any>): Promise<ShellResult> {
     const { command, cwd, timeout = 5000 } = args as ShellToolArgs;
 
-    if (!this.isCommandSafe(command)) {
-      throw new Error(`Command not allowed: ${command}`);
+    // Use centralized PermissionManager for safety checks
+    const validation = permissionManager.validateCommand(command);
+    if (!validation.allowed) {
+      throw new Error(`Command not allowed: ${validation.reason}`);
     }
 
     try {
@@ -88,10 +53,5 @@ export class ShellTool implements MCPTool {
     }
   }
 
-  /**
-   * Get list of allowed commands
-   */
-  public getAllowedCommands(): string[] {
-    return [...this.allowedCommands];
-  }
+
 }

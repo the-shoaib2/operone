@@ -12,6 +12,7 @@
     "dev": "turbo run dev --concurrency=20",
     "dev:operone": "turbo run dev --concurrency=20 --filter=operone",
     "dev:web": "turbo run dev --concurrency=20 --filter=web",
+    "dev:electron": "turbo run dev --concurrency=20 --filter=electron",
     "dev:docs": "turbo run dev --concurrency=20 --filter=docs",
     "dev:apps": "turbo run dev --filter=apps",
     "dev:packages": "turbo run dev --filter=packages",

@@ -3,7 +3,7 @@ if (process.env.NODE_ENV === 'development' || process.env.VITE_DEV_SERVER_URL) {
   process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'
 }
 
-import { app, BrowserWindow, shell, ipcMain, session } from 'electron'
+import { app, BrowserWindow, shell, ipcMain, session, dialog } from 'electron'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import Store from 'electron-store'
@@ -34,6 +34,7 @@ app.commandLine.appendSwitch('disable-gpu-compositing')
 
 import { getAIService } from './services/ai-service'
 import { getStorageService } from './services/storage-service'
+import { getModelStorageService } from './services/model-storage'
 
 // AI Service - initialized lazily
 let aiService: ReturnType<typeof getAIService> | null = null
@@ -219,6 +220,88 @@ function setupIPCHandlers() {
   ipcMain.handle('ai:getModels', async (_event, providerType: ProviderType) => {
     const service = getOrCreateAIService()
     return service.getModels(providerType)
+  })
+
+  // Task Management
+  ipcMain.handle('task:submit', async (_event, task) => {
+    const service = getOrCreateAIService()
+    return await service.submitTask(task)
+  })
+
+  ipcMain.handle('task:get', async (_event, id) => {
+    const service = getOrCreateAIService()
+    return await service.getTask(id)
+  })
+
+  ipcMain.handle('task:list', async (_event, limit) => {
+    const service = getOrCreateAIService()
+    return await service.listTasks(limit)
+  })
+
+  // GGUF Model Management
+  ipcMain.handle('ai:model:import', async (_event, { filePath, metadata }) => {
+    const modelStorage = getModelStorageService()
+    
+    try {
+      // Validate file first
+      const validation = await modelStorage.validateGGUFFile(filePath)
+      if (!validation.valid) {
+        throw new Error(validation.error || 'Invalid GGUF file')
+      }
+
+      // Extract metadata from file
+      const extractedMetadata = await modelStorage.extractMetadata(filePath)
+      
+      // Merge provided metadata with extracted metadata
+      const fullMetadata = {
+        ...extractedMetadata,
+        ...metadata
+      }
+
+      // Import the model
+      const importedModel = await modelStorage.importModel(filePath, fullMetadata)
+      return { success: true, model: importedModel }
+    } catch (error) {
+      console.error('Failed to import GGUF model:', error)
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Failed to import model' 
+      }
+    }
+  })
+
+  ipcMain.handle('ai:model:list', async () => {
+    const modelStorage = getModelStorageService()
+    return modelStorage.listModels()
+  })
+
+  ipcMain.handle('ai:model:remove', async (_event, modelId: string) => {
+    const modelStorage = getModelStorageService()
+    const success = modelStorage.removeModel(modelId)
+    return { success }
+  })
+
+  ipcMain.handle('ai:model:validate', async (_event, filePath: string) => {
+    const modelStorage = getModelStorageService()
+    return await modelStorage.validateGGUFFile(filePath)
+  })
+
+  // File Dialog
+  ipcMain.handle('dialog:openFile', async (_event, options) => {
+    const result = await dialog.showOpenDialog({
+      properties: ['openFile'],
+      filters: [
+        { name: 'GGUF Models', extensions: ['gguf'] },
+        { name: 'All Files', extensions: ['*'] }
+      ],
+      ...options
+    })
+    
+    if (result.canceled) {
+      return { canceled: true }
+    }
+    
+    return { canceled: false, filePath: result.filePaths[0] }
   })
 
 

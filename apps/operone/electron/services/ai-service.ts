@@ -12,7 +12,10 @@ import {
   AgentManager
 } from '@repo/operone'
 import { createThinkingPipeline, ThinkingPipeline } from '@operone/thinking'
-import type { ProviderType } from '@repo/types'
+import { TaskOrchestrator } from '@operone/core'
+import { SQLiteTaskRepository } from '@operone/db'
+import { mcpBroker, permissionManager } from '@operone/mcp'
+import type { ProviderType, AITask } from '@repo/types'
 import Store from 'electron-store'
 import path from 'path'
 import { app, BrowserWindow } from 'electron'
@@ -31,6 +34,8 @@ class AIService {
   private agentManager: AgentManager;
   private eventBus: EventBus;
   private mainWindow: BrowserWindow | null = null;
+  private taskOrchestrator: TaskOrchestrator;
+  private taskRepository: SQLiteTaskRepository;
 
   constructor() {
     // Initialize EventBus
@@ -38,6 +43,21 @@ class AIService {
 
     // Subscribe to all events and forward to renderer
     this.setupEventForwarding();
+
+    // Initialize Task System
+    const userDataPath = app.getPath('userData');
+    this.taskRepository = new SQLiteTaskRepository(path.join(userDataPath, 'operone-tasks.db'));
+    this.taskOrchestrator = new TaskOrchestrator(5, this.taskRepository);
+    
+    // Connect Orchestrator to MCP Broker
+    this.taskOrchestrator.setToolExecutor(async (tool: string, args: any, stepId?: string) => {
+        console.log(`Executing tool: ${tool} for step ${stepId}`, args);
+        // Execute via MCP Broker
+        return await mcpBroker.callTool(tool, args, { stepId });
+    });
+
+    // Handle Orchestrator Events
+    this.setupTaskEvents();
 
     // Initialize Provider Manager
     this.providerManager = new ProviderManager();
@@ -60,7 +80,6 @@ class AIService {
     }
 
     // Initialize Memory Manager
-    const userDataPath = app.getPath('userData');
     this.memoryManager = new MemoryManager(path.join(userDataPath, 'operone-memory.db'));
 
     // Initialize Reasoning Engine
@@ -71,6 +90,35 @@ class AIService {
 
     // Initialize Agents
     this.initializeAgents();
+  }
+  
+  private setupTaskEvents() {
+    const forwardTaskEvent = (event: string, payload: any) => {
+        if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+            this.mainWindow.webContents.send('task:event', { event, payload });
+        }
+    };
+
+    this.taskOrchestrator.on('aitask:created', (t) => forwardTaskEvent('created', t));
+    this.taskOrchestrator.on('aitask:updated', (t) => forwardTaskEvent('updated', t));
+    this.taskOrchestrator.on('aitask:completed', (t) => forwardTaskEvent('completed', t));
+    this.taskOrchestrator.on('aitask:failed', (p) => forwardTaskEvent('failed', p));
+    this.taskOrchestrator.on('aitask:step-started', (p) => forwardTaskEvent('step-started', p));
+    this.taskOrchestrator.on('aitask:step-completed', (p) => forwardTaskEvent('step-completed', p));
+    this.taskOrchestrator.on('aitask:step-failed', (p) => forwardTaskEvent('step-failed', p));
+  }
+
+  // Expose Task API
+  async submitTask(task: AITask): Promise<void> {
+    return this.taskOrchestrator.submitAITask(task);
+  }
+
+  async getTask(id: string): Promise<AITask | undefined> {
+    return this.taskRepository.getTask(id);
+  }
+
+  async listTasks(limit?: number): Promise<AITask[]> {
+    return this.taskRepository.listTasks(limit);
   }
 
   private setupEventForwarding() {

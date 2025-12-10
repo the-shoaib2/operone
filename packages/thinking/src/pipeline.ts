@@ -30,8 +30,7 @@ import { safetyEngine } from './safety';
 import { toolRouter } from './routing';
 import { outputEngine } from './output';
 import { mcpBroker } from '@operone/mcp';
-// import { memoryRecall, memoryStore } from '@operone/memory'; // Commented out - causes build issues with Vite/Rollup due to CommonJS/ESM incompatibility
-
+import { memoryRecall, memoryStore } from '@operone/memory';
 /**
  * Main Thinking Pipeline
  * 
@@ -471,6 +470,7 @@ export class ThinkingPipeline {
 
   /**
    * Handles simple queries that bypass the full pipeline
+   * Still runs intent detection and safety check for context
    */
   private async handleSimpleQuery(
     input: string,
@@ -479,10 +479,34 @@ export class ThinkingPipeline {
   ): Promise<PipelineResult> {
     stepsExecuted.push('simple_response');
 
-    // For simple queries, just format the input as a query
+    // Run intent detection even for simple queries (for context)
+    try {
+      const intent = await intentEngine.detect(input);
+      context.intent = intent;
+      stepsExecuted.push('intent_analysis');
+    } catch (error) {
+      // Intent detection failed, continue anyway
+      console.warn('Intent detection failed for simple query:', error);
+    }
+
+    // Run basic safety check
+    try {
+      const safetyCheck = await safetyEngine.validate({
+        id: 'simple-query',
+        steps: [],
+        totalEstimatedDuration: 100,
+        parallelGroups: [],
+        metadata: { simple: true },
+      });
+      context.safety = safetyCheck;
+      stepsExecuted.push('safety_validation');
+    } catch (error) {
+      console.warn('Safety check failed for simple query:', error);
+    }
+
+    // For simple queries, let the output engine detect the appropriate format
     const output = await outputEngine.format({
       content: `Processing simple query: ${input}`,
-      format: 'plain',
       metadata: {
         simple: true,
       },
@@ -501,11 +525,11 @@ export class ThinkingPipeline {
    * Retrieves relevant context from memory
    */
   private async retrieveMemoryContext(input: string, intent: Intent): Promise<any[]> {
-    // Memory recall disabled due to build compatibility issues
-    console.warn('Memory recall is disabled in this build');
-    return [];
+    // // Memory recall disabled due to build compatibility issues
+    // console.warn('Memory recall is disabled in this build');
+    // return [];
     
-    /* Original implementation:
+    // Original implementation:
     try {
       const query = {
         query: input,
@@ -519,7 +543,6 @@ export class ThinkingPipeline {
       console.error('Error retrieving memory context:', error);
       return [];
     }
-    */
   }
 
   /**
@@ -607,10 +630,10 @@ export class ThinkingPipeline {
     success: boolean,
     error?: string
   ): Promise<void> {
-    // Memory storage disabled due to build compatibility issues
-    console.warn('Memory storage is disabled in this build');
+    // // Memory storage disabled due to build compatibility issues
+    // console.warn('Memory storage is disabled in this build');
     
-    /* Original implementation:
+    // Original implementation:
     try {
       const taskResult = {
         id: context.sessionId || nanoid(),
@@ -632,7 +655,6 @@ export class ThinkingPipeline {
     } catch (err) {
       console.error('Error storing in memory:', err);
     }
-    */
   }
 
   /**
@@ -664,7 +686,7 @@ export class ThinkingPipeline {
     safetyCheck: SafetyCheck
   ): PipelineResult {
     return {
-      success: false,
+      success: true, // Changed from false - confirmation required doesn't mean failure
       output: {
         format: 'markdown',
         content: safetyCheck.confirmationMessage || 'Confirmation required',

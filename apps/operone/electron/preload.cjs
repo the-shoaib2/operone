@@ -43,6 +43,31 @@ contextBridge.exposeInMainWorld('electronAPI', {
         }
     },
 
+    // Task API
+    task: {
+        submit: (task) => ipcRenderer.invoke('task:submit', task),
+        get: (id) => ipcRenderer.invoke('task:get', id),
+        list: (limit) => ipcRenderer.invoke('task:list', limit),
+        onEvent: (callback) => {
+            const subscription = (_event, payload) => callback(payload)
+            ipcRenderer.on('task:event', subscription)
+            return () => ipcRenderer.removeListener('task:event', subscription)
+        }
+    },
+
+    // GGUF Model Management
+    model: {
+        import: (filePath, metadata) => ipcRenderer.invoke('ai:model:import', { filePath, metadata }),
+        list: () => ipcRenderer.invoke('ai:model:list'),
+        remove: (modelId) => ipcRenderer.invoke('ai:model:remove', modelId),
+        validate: (filePath) => ipcRenderer.invoke('ai:model:validate', filePath)
+    },
+
+    // File Dialog
+    dialog: {
+        openFile: (options) => ipcRenderer.invoke('dialog:openFile', options)
+    },
+
     // Memory operations
     ingestDocument: (id, content, metadata) =>
         ipcRenderer.invoke('ai:ingestDocument', { id, content, metadata }),

@@ -1421,10 +1421,17 @@ export type ModelInfo = {
   isNew?: boolean;
 };
 
+
+export type PromptInputSelectSeparatorProps = ComponentProps<typeof SelectPrimitive.Separator>;
+export const PromptInputSelectSeparator = ({ className, ...props }: PromptInputSelectSeparatorProps) => (
+  <SelectPrimitive.Separator className={cn("-mx-1 my-1 h-px bg-muted", className)} {...props} />
+);
+
 export type PromptInputModelSelectorProps = {
   models: ModelInfo[];
   selectedModel?: string;
   onModelChange?: (modelId: string) => void;
+  onAddModel?: () => void;
   className?: string;
   placeholder?: string;
   maxContentHeight?: string;
@@ -1438,6 +1445,7 @@ export const PromptInputModelSelector = ({
   models,
   selectedModel,
   onModelChange,
+  onAddModel,
   className,
   placeholder = "Select a model",
   maxContentHeight = "400px",
@@ -1448,8 +1456,16 @@ export const PromptInputModelSelector = ({
 }: PromptInputModelSelectorProps) => {
   const selectedModelInfo = models.find(m => m.id === selectedModel);
 
+  const handleValueChange = (value: string) => {
+    if (value === "__add_model__") {
+      onAddModel?.();
+    } else {
+      onModelChange?.(value);
+    }
+  };
+
   return (
-    <Select value={selectedModel} onValueChange={onModelChange}>
+    <Select value={selectedModel} onValueChange={handleValueChange}>
       <PromptInputSelectTrigger className={cn("w-full", className)}>
         <div className="flex items-center gap-1 min-w-0 flex-1">
           {selectedModelInfo && (
@@ -1538,6 +1554,21 @@ export const PromptInputModelSelector = ({
                 </div>
               </PromptInputSelectItem>
             ))
+          )}
+
+          {onAddModel && (
+            <>
+              {models.length > 0 && <PromptInputSelectSeparator />}
+              <PromptInputSelectItem
+                value="__add_model__"
+                className="px-2 py-2 cursor-pointer transition-all duration-200 hover:bg-accent/50 focus:bg-accent/50 border-0 text-primary font-medium"
+              >
+                <div className="flex items-center gap-2 w-full">
+                  <PlusIcon className="size-3.5 flex-shrink-0" />
+                  <span className="text-xs truncate flex-1">Add Model</span>
+                </div>
+              </PromptInputSelectItem>
+            </>
           )}
         </div>
       </PromptInputSelectContent>

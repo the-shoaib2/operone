@@ -2,7 +2,8 @@ import { EventEmitter } from 'events';
 import { FileTool } from './FileTool';
 import { ShellTool } from './ShellTool';
 import { LogTool } from './LogTool';
-// import { SSHClient } from '@operone/networking'; // Commented out - causes build issues with Vite/Rollup due to CommonJS/ESM incompatibility
+import { toolRegistry, ToolSchema } from './ToolRegistry';
+import { SSHClient } from '@operone/networking'; 
 
 export interface Tool {
   name: string;
@@ -112,7 +113,14 @@ export class MCPBroker extends EventEmitter {
   }
 
   public async discoverTools(includeRemote: boolean = false): Promise<Tool[]> {
-    const localTools = Array.from(this.tools.values());
+    const localTools = Array.from(this.tools.values()).map(tool => {
+        // Attach schema from registry if available
+        const schema = toolRegistry.getSchema(tool.name);
+        if (schema) {
+            return { ...tool, schema };
+        }
+        return tool;
+    });
     
     if (!includeRemote || !this.config.enablePeerNetwork) {
       return localTools;
@@ -123,12 +131,15 @@ export class MCPBroker extends EventEmitter {
     for (const [peerId, peerInfo] of this.peers.entries()) {
       if (peerInfo.status === 'online') {
         for (const toolName of peerInfo.tools) {
+          const schema = toolRegistry.getSchema(toolName);
+          
           remoteTools.push({
             name: toolName,
-            description: `Remote tool from ${peerInfo.name}`,
+            description: schema?.description || `Remote tool from ${peerInfo.name}`,
             execute: async (args: any) => this.executeRemoteTool(peerId, toolName, args),
             peerId,
-            capabilities: ['remote']
+            capabilities: ['remote'],
+            schema
           });
         }
       }
@@ -143,16 +154,11 @@ export class MCPBroker extends EventEmitter {
   }
 
   private async callRemoteTool(name: string, args: any, sshConfig: any): Promise<any> {
-    // SSH remote execution is disabled to avoid build issues
-    // Uncomment and import SSHClient if needed for remote execution
-    throw new Error('SSH remote execution is not available in this build');
     
-    /* Original implementation:
     const client = new SSHClient(sshConfig);
     await client.connect();
     
     try {
-      // For now, only shell tool is supported remotely via SSH exec
       if (name === 'shell') {
         const command = args.command;
         const result = await client.execute(command);
@@ -163,7 +169,6 @@ export class MCPBroker extends EventEmitter {
     } finally {
       client.disconnect();
     }
-    */
   }
   
   // ============================================================================
@@ -290,6 +295,12 @@ export class MCPBroker extends EventEmitter {
     };
   }
   
+  private remoteExecutor?: (peerId: string, toolName: string, args: any) => Promise<any>;
+
+  public setRemoteExecutor(executor: (peerId: string, toolName: string, args: any) => Promise<any>) {
+    this.remoteExecutor = executor;
+  }
+
   private async executeRemoteTool(peerId: string, toolName: string, args: any): Promise<any> {
     const peer = this.peers.get(peerId);
     if (!peer) {
@@ -298,9 +309,12 @@ export class MCPBroker extends EventEmitter {
     
     this.emit('tool:remote-call', { peerId, toolName, args });
     
-    // This will be implemented by PeerNetwork to send the request over WebSocket
-    // For now, throw an error indicating it needs to be connected
-    throw new Error('Remote tool execution requires PeerNetwork to be connected');
+    if (this.remoteExecutor) {
+        return await this.remoteExecutor(peerId, toolName, args);
+    }
+    
+    // Fallback if no executor configured
+    throw new Error('Remote tool execution requires a configured remote executor');
   }
   
   private broadcastToolUpdate(action: 'registered' | 'unregistered', toolName: string, tool?: Tool): void {

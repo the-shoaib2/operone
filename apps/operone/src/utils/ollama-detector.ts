@@ -21,6 +21,18 @@ export interface OllamaInfo {
   build: string;
 }
 
+/**
+ * Silent fetch wrapper that prevents browser DevTools from logging network errors
+ */
+async function silentFetch(url: string, options?: RequestInit): Promise<Response | null> {
+  try {
+    return await fetch(url, options);
+  } catch (error) {
+    // Silently catch all fetch errors to prevent browser console spam
+    return null;
+  }
+}
+
 export class OllamaDetector {
   private static instance: OllamaDetector;
   private baseURL: string = 'http://localhost:11434';
@@ -39,23 +51,17 @@ export class OllamaDetector {
       this.baseURL = baseURL;
     }
 
-    try {
-      const response = await fetch(`${this.baseURL}/api/version`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        signal: AbortSignal.timeout(5000), // 5 second timeout
-      });
+    const response = await silentFetch(`${this.baseURL}/api/version`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      signal: AbortSignal.timeout(5000), // 5 second timeout
+    });
 
-      if (response.ok) {
-        this.isAvailable = true;
-        return true;
-      }
-    } catch (error) {
-      console.warn('Ollama not available:', error);
-      this.isAvailable = false;
-      return false;
+    if (response?.ok) {
+      this.isAvailable = true;
+      return true;
     }
 
     this.isAvailable = false;
@@ -72,7 +78,7 @@ export class OllamaDetector {
     }
 
     try {
-      const response = await fetch(`${this.baseURL}/api/tags`, {
+      const response = await silentFetch(`${this.baseURL}/api/tags`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -80,13 +86,13 @@ export class OllamaDetector {
         signal: AbortSignal.timeout(10000), // 10 second timeout
       });
 
-      if (response.ok) {
+      if (response?.ok) {
         const data = await response.json();
         this.availableModels = data?.models || [];
         return this.availableModels;
       }
     } catch (error) {
-      console.error('Failed to fetch Ollama models:', error);
+      // Silently handle errors when fetching models
     }
 
     return [];
@@ -102,7 +108,7 @@ export class OllamaDetector {
     }
 
     try {
-      const response = await fetch(`${this.baseURL}/api/version`, {
+      const response = await silentFetch(`${this.baseURL}/api/version`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -110,11 +116,11 @@ export class OllamaDetector {
         signal: AbortSignal.timeout(5000),
       });
 
-      if (response.ok) {
+      if (response?.ok) {
         return await response.json();
       }
     } catch (error) {
-      console.error('Failed to fetch Ollama info:', error);
+      // Silently handle errors when fetching Ollama info
     }
 
     return null;
@@ -185,7 +191,7 @@ export class BrowserAIService {
       
       return false;
     } catch (error) {
-      console.error('Failed to initialize browser AI service:', error);
+      // Silently handle initialization errors
       return false;
     }
   }
@@ -206,7 +212,7 @@ export class BrowserAIService {
     }
 
     try {
-      const response = await fetch(`${this.baseURL}/api/generate`, {
+      const response = await silentFetch(`${this.baseURL}/api/generate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -219,14 +225,14 @@ export class BrowserAIService {
         signal: AbortSignal.timeout(30000), // 30 second timeout
       });
 
-      if (!response.ok) {
-        throw new Error(`Ollama API error: ${response.statusText}`);
+      if (!response?.ok) {
+        throw new Error(`Ollama API error: ${response?.statusText || 'Connection failed'}`);
       }
 
       const data = await response.json();
       return data.response || 'No response received';
     } catch (error) {
-      console.error('Error sending message to Ollama:', error);
+      // Re-throw error for caller to handle
       throw error;
     }
   }
@@ -262,7 +268,7 @@ export class BrowserAIService {
       
       return models;
     } catch (error) {
-      console.error('Failed to get Ollama models:', error);
+      // Silently handle errors when getting models
       return [];
     }
   }
