@@ -4,7 +4,7 @@ import {
   waitForAppReady
 } from './test-utils'
 
-test('chat interface works', async () => {
+test('chat interface works with mocked AI', async () => {
   // Launch Electron app
   const electronApp = await launchElectronApp()
 
@@ -47,7 +47,6 @@ test('chat interface works', async () => {
   // Get the first window
   const window = await electronApp.firstWindow()
   
-
 
   // Reload the window to ensure mocks are active
   await window.reload()
@@ -105,6 +104,57 @@ test('chat interface works', async () => {
   
   // Check for AI response
   await expect(window.locator('text=Hello World!')).toBeVisible({ timeout: 20000 })
+
+  // Close app
+  await electronApp.close()
+})
+
+test('OpenRouter integration works with real API', async () => {
+  // Launch Electron app
+  const electronApp = await launchElectronApp()
+
+  // Setup minimal mocks (only auth, let AI use real OpenRouter)
+  await electronApp.evaluate(({ ipcMain }) => {
+    // Mock auth:getUser
+    ipcMain.removeHandler('auth:getUser')
+    ipcMain.handle('auth:getUser', () => {
+      return { id: 'test-user', name: 'Test User', email: 'test@example.com' }
+    })
+  })
+
+  // Get the first window
+  const window = await electronApp.firstWindow()
+  
+  // Wait for app to be ready
+  await waitForAppReady(window)
+  
+  // Wait extra time for React to fully render
+  await window.waitForTimeout(3000)
+  
+  // Look for the chat input area
+  const inputArea = window.locator('[data-testid="chat-input"]')
+  
+  await expect(inputArea).toBeVisible({ timeout: 20000 })
+  
+  // Type a simple test message
+  await inputArea.fill('Say "OpenRouter works!" and nothing else.')
+  
+  // Submit via Enter
+  await inputArea.press('Enter')
+  
+  // Verify input is cleared
+  await expect(inputArea).toHaveValue('', { timeout: 5000 })
+  
+  // Verify user message appears
+  await expect(window.locator('text=Say "OpenRouter works!"')).toBeVisible({ timeout: 5000 })
+  
+  // Wait for AI response (real API call, may take longer)
+  await window.waitForTimeout(5000)
+  
+  // Check for AI response containing "OpenRouter"
+  // Note: The exact response may vary, so we check for partial match
+  const responseLocator = window.locator('[role="article"]').filter({ hasText: 'OpenRouter' })
+  await expect(responseLocator).toBeVisible({ timeout: 30000 })
 
   // Close app
   await electronApp.close()

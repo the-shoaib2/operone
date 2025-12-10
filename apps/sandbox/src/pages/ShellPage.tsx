@@ -1,14 +1,14 @@
 import { PageLayout } from '../components/PageLayout';
-import { Terminal } from '../components/Terminal';
+import { RealShell } from '../components/RealShell';
 
 export function ShellPage() {
     return (
         <PageLayout
             title="Shell"
-            description="Command-line interface and shell operations"
+            description="Real shell command execution with history and undo/redo"
         >
-            <div className="border border-gray-800 rounded-lg bg-gray-900 overflow-hidden h-[calc(100vh-12rem)]">
-                <Terminal />
+            <div className="h-[calc(100vh-10rem)] border border-dark-border bg-dark-bg overflow-hidden">
+                <RealShell />
             </div>
         </PageLayout>
     );

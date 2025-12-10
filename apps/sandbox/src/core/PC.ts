@@ -1,5 +1,6 @@
 import { FileSystem } from './FileSystem';
 import { MockMCPServer } from './MockMCP';
+import type { Network } from './Network';
 
 export class PC {
   id: string;
@@ -9,13 +10,15 @@ export class PC {
   mcpServer: MockMCPServer;
   status: 'online' | 'offline' | 'booting';
   logs: string[] = [];
+  network: Network;
 
   services: Map<string, { port: number, type: string, status: 'running' | 'stopped' }> = new Map();
 
-  constructor(id: string, hostname: string, ip: string) {
+  constructor(id: string, hostname: string, ip: string, network: Network) {
     this.id = id;
     this.hostname = hostname;
     this.ip = ip;
+    this.network = network;
     this.status = 'online';
     
     this.fs = new FileSystem();
@@ -158,6 +161,16 @@ export class PC {
         case 'service':
           return this.cmdService(args);
         
+        // Networking Commands (Topology-aware)
+        case 'route':
+          return this.cmdRoute();
+        case 'traceroute':
+          return this.cmdTraceroute(args);
+        case 'ssh':
+          return this.cmdSsh(args);
+        case 'scp':
+          return this.cmdScp(args);
+        
         // Help
         case 'help':
           return this.cmdHelp();
@@ -235,7 +248,7 @@ ${serviceList || 'No active connections'}`;
 
   private cmdPs(): string {
     const services = Array.from(this.services.entries())
-      .map(([name, svc], i) => `${1000 + i}  pts/0    00:00:0${i} ${name}`)
+      .map(([name], i) => `${1000 + i}  pts/0    00:00:0${i} ${name}`)
       .join('\n');
     
     return `  PID TTY          TIME CMD
@@ -273,6 +286,125 @@ ${services}`;
     }
   }
 
+  private cmdRoute(): string {
+    const topology = this.network.currentTopology;
+    const allPCs = this.network.getAllPCs();
+    const hubPC = allPCs[0];
+    
+    let output = `Current Topology: ${topology}\n`;
+    
+    switch (topology) {
+      case 'star':
+        output += `Hub: ${hubPC.hostname} (${hubPC.ip})\n`;
+        output += `All traffic routes through hub\n`;
+        break;
+      case 'mesh':
+        output += `Full mesh topology\n`;
+        output += `Direct connections to all nodes\n`;
+        break;
+      case 'bus':
+        output += `Linear bus topology\n`;
+        output += `Traffic travels along the bus\n`;
+        break;
+      case 'ring':
+        output += `Ring topology\n`;
+        output += `Traffic follows circular path\n`;
+        break;
+      case 'tree':
+        output += `Binary tree topology\n`;
+        output += `Root: ${hubPC.hostname} (${hubPC.ip})\n`;
+        break;
+    }
+    
+    output += `\nConnected PCs: ${allPCs.length}`;
+    return output;
+  }
+
+  private cmdTraceroute(args: string[]): string {
+    if (args.length === 0) return 'Usage: traceroute <hostname|ip>';
+    
+    const target = args[0];
+    let targetPC = this.network.getPcByIp(target) || this.network.getPcByHostname(target);
+    
+    if (!targetPC) {
+      return `traceroute: unknown host ${target}`;
+    }
+    
+    const path = this.network.findRoutingPath(this.id, targetPC.id);
+    
+    if (path.length === 0) {
+      return `traceroute: no route to host ${target}`;
+    }
+    
+    let output = `Tracing route to ${targetPC.hostname} (${targetPC.ip})\n`;
+    output += `over a maximum of ${path.length - 1} hops:\n\n`;
+    
+    for (let i = 0; i < path.length; i++) {
+      const pc = this.network.getPC(path[i]);
+      if (pc) {
+        const latency = (Math.random() * 2 + i * 0.5).toFixed(1);
+        output += `  ${i + 1}  ${pc.hostname} (${pc.ip})  ${latency}ms\n`;
+      }
+    }
+    
+    output += `\nTrace complete.`;
+    return output;
+  }
+
+  private cmdSsh(args: string[]): string {
+    if (args.length === 0) return 'Usage: ssh <hostname|ip>';
+    
+    const target = args[0];
+    const targetPC = this.network.getPcByIp(target) || this.network.getPcByHostname(target);
+    
+    if (!targetPC) {
+      return `ssh: Could not resolve hostname ${target}`;
+    }
+    
+    if (targetPC.status !== 'online') {
+      return `ssh: connect to host ${target} port 22: No route to host`;
+    }
+    
+    const path = this.network.findRoutingPath(this.id, targetPC.id);
+    
+    if (path.length === 0) {
+      return `ssh: connect to host ${target} port 22: No route to host`;
+    }
+    
+    return `Connected to ${targetPC.hostname} (${targetPC.ip})\nWelcome to ${targetPC.hostname}\n\nNote: This is a simulated SSH connection.\nUse the network map to select ${targetPC.hostname} to interact with it.`;
+  }
+
+  private cmdScp(args: string[]): string {
+    if (args.length < 2) return 'Usage: scp <file> <hostname|ip>';
+    
+    const filename = args[0];
+    const target = args[1];
+    
+    const fileContent = this.fs.readFile(filename);
+    if (fileContent === null) {
+      return `scp: ${filename}: No such file or directory`;
+    }
+    
+    const targetPC = this.network.getPcByIp(target) || this.network.getPcByHostname(target);
+    
+    if (!targetPC) {
+      return `scp: Could not resolve hostname ${target}`;
+    }
+    
+    const path = this.network.findRoutingPath(this.id, targetPC.id);
+    
+    if (path.length === 0) {
+      return `scp: connect to host ${target} port 22: No route to host`;
+    }
+    
+    // Simulate file transfer
+    targetPC.fs.writeFile(filename, fileContent);
+    this.log(`SCP: Copied ${filename} to ${targetPC.hostname}`);
+    targetPC.log(`SCP: Received ${filename} from ${this.hostname}`);
+    
+    return `${filename}                                    100%  ${fileContent.length}B   ${(fileContent.length / 1024).toFixed(1)}KB/s   00:00`;
+  }
+
   private cmdHelp(): string {
     return `Available commands:
 
@@ -288,6 +420,10 @@ Network:
   ping <host>        - Ping a host
   ifconfig           - Show network configuration
   netstat            - Show network connections
+  route              - Show routing table and topology
+  traceroute <host>  - Trace route to host
+  ssh <host>         - Connect to remote host
+  scp <file> <host>  - Secure copy file to host
 
 System:
   hostname           - Show hostname

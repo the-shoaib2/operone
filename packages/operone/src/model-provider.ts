@@ -102,9 +102,14 @@ export class ModelProvider {
 
   private createOpenRouterProvider(config: OpenRouterConfig) {
     // OpenRouter uses OpenAI-compatible API
+    // Must use /chat/completions endpoint explicitly
     return createOpenAI({
       apiKey: config.apiKey,
       baseURL: 'https://openrouter.ai/api/v1',
+      headers: {
+        'HTTP-Referer': 'https://operone.vercel.app', // Optional, for rankings
+        'X-Title': 'Operone', // Optional, shows in rankings
+      },
     });
   }
 
@@ -134,6 +139,11 @@ export class ModelProvider {
    * Get the AI SDK model instance
    */
   getModel() {
+    // For OpenRouter, use .chat() method to force /chat/completions endpoint
+    // instead of the newer /responses endpoint which OpenRouter doesn't support
+    if (this.config.type === 'openrouter') {
+      return this.provider.chat(this.config.model);
+    }
     return this.provider(this.config.model);
   }
 
@@ -211,17 +221,17 @@ export class ModelRegistry {
     // ollama: [],
     openrouter: [
       {
-        id: 'mistralai/devstral-2512:free',
-        name: 'Devstral 2512 (Free)',
-        provider: 'openrouter',
-        description: 'Mistral AI Devstral 2512 - Free tier',
-        contextWindow: 32768,
-      },
-      {
         id: 'google/gemini-2.0-flash-exp:free',
         name: 'Gemini 2.0 Flash (Free)',
         provider: 'openrouter',
         description: 'Google Gemini 2.0 Flash - Free tier',
+        contextWindow: 32768,
+      },
+      {
+        id: 'mistralai/devstral-2512:free',
+        name: 'Devstral 2512 (Free)',
+        provider: 'openrouter',
+        description: 'Mistral AI Devstral 2512 - Free tier',
         contextWindow: 32768,
       },
       {
@@ -364,7 +374,7 @@ export class ProviderManager {
 export function createDefaultConfig(): ProviderConfig {
   return {
     type: 'openrouter',
-    model: 'mistralai/devstral-2512:free',
+    model: 'google/gemini-2.0-flash-exp:free',
     apiKey: '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',
     baseURL: 'https://openrouter.ai/api/v1',
   };

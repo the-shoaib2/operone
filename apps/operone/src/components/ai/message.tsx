@@ -34,12 +34,12 @@ export type MessageProps = HTMLAttributes<HTMLDivElement> & {
 
 export const Message = ({ className, from, children, ...props }: MessageProps) => {
   const { user } = useAuth();
-  
+
   return (
     <div
       className={cn(
-        "group flex w-full max-w-[80%] flex-col gap-3",
-        from === "user" ? "is-user ml-auto justify-end" : "is-assistant",
+        "group flex flex-col gap-3",
+        from === "user" ? "is-user ml-auto justify-end w-full max-w-[80%]" : "is-assistant w-full",
         className
       )}
       {...props}
@@ -54,9 +54,9 @@ export const Message = ({ className, from, children, ...props }: MessageProps) =
             <span className="text-xs text-muted-foreground">You</span>
             <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-sm overflow-hidden">
               {user?.image ? (
-                <img 
-                  src={user.image} 
-                  alt={user.name || "User"} 
+                <img
+                  src={user.image}
+                  alt={user.name || "User"}
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     // Fallback to user icon if image fails
@@ -489,14 +489,14 @@ export type MessageLoadingProps = HTMLAttributes<HTMLDivElement> & {
   streamingMessage?: string;
 };
 
-export const MessageLoading = memo(({ 
-  className, 
-  isLoading = false, 
+export const MessageLoading = memo(({
+  className,
+  isLoading = false,
   streamingMessage,
-  ...props 
+  ...props
 }: MessageLoadingProps) => {
   if (!isLoading || streamingMessage) return null;
-  
+
   return (
     <div className={cn("flex justify-start", className)} {...props}>
       <Message from="assistant">

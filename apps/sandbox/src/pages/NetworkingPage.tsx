@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { PageLayout } from '../components/PageLayout';
 import { NetworkMap } from '../components/NetworkMap';
 import { PCDashboard } from '../components/PCDashboard';
@@ -12,6 +12,11 @@ export function NetworkingPage() {
     const [showFileTransfer, setShowFileTransfer] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
 
+    // Sync topology with network instance
+    useEffect(() => {
+        network.setTopology(topology);
+    }, [topology, network]);
+
     const topologies: { value: TopologyType; label: string; icon: string }[] = [
         { value: 'star', label: 'Star', icon: '⭐' },
         { value: 'mesh', label: 'Mesh', icon: '🕸️' },
@@ -22,6 +27,7 @@ export function NetworkingPage() {
 
     const pcs = useMemo(() => network.getAllPCs(), [network]);
     const connectedCount = useMemo(() => pcs.filter(pc => pc.status === 'online').length, [pcs]);
+
 
     return (
         <PageLayout

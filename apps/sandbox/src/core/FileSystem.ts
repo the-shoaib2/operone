@@ -1,10 +1,8 @@
 export class FileSystem {
   private files: Map<string, string>;
-  private directories: Set<string>;
 
   constructor() {
     this.files = new Map();
-    this.directories = new Set(['/home', '/tmp', '/var']);
     // Default files
     this.files.set('/home/readme.txt', 'Welcome to the simulation!');
   }

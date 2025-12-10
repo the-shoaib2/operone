@@ -183,6 +183,7 @@ export class TopologyManager {
         return connections;
     }
 
+
     private static treeConnections(pcIds: string[]): Connection[] {
         const connections: Connection[] = [];
         // Binary tree structure: parent connects to children
@@ -199,4 +200,160 @@ export class TopologyManager {
         }
         return connections;
     }
+
+    /**
+     * Find routing path between two PCs based on topology
+     * Returns array of PC IDs representing the path from source to destination
+     */
+    static findPath(
+        pcIds: string[],
+        topology: TopologyType,
+        fromId: string,
+        toId: string
+    ): string[] {
+        if (fromId === toId) return [fromId];
+        
+        const fromIndex = pcIds.indexOf(fromId);
+        const toIndex = pcIds.indexOf(toId);
+        
+        if (fromIndex === -1 || toIndex === -1) return [];
+
+        switch (topology) {
+            case 'star':
+                return this.findStarPath(pcIds, fromIndex, toIndex);
+            case 'mesh':
+                return this.findMeshPath(pcIds, fromIndex, toIndex);
+            case 'bus':
+                return this.findBusPath(pcIds, fromIndex, toIndex);
+            case 'ring':
+                return this.findRingPath(pcIds, fromIndex, toIndex);
+            case 'tree':
+                return this.findTreePath(pcIds, fromIndex, toIndex);
+            default:
+                return [pcIds[fromIndex], pcIds[toIndex]];
+        }
+    }
+
+    private static findStarPath(pcIds: string[], fromIndex: number, toIndex: number): string[] {
+        // Star topology: all traffic routes through hub (index 0)
+        const hub = pcIds[0];
+        const from = pcIds[fromIndex];
+        const to = pcIds[toIndex];
+
+        if (fromIndex === 0) {
+            // From hub to spoke
+            return [from, to];
+        } else if (toIndex === 0) {
+            // From spoke to hub
+            return [from, to];
+        } else {
+            // From spoke to spoke via hub
+            return [from, hub, to];
+        }
+    }
+
+    private static findMeshPath(pcIds: string[], fromIndex: number, toIndex: number): string[] {
+        // Mesh topology: direct connection between any two nodes
+        return [pcIds[fromIndex], pcIds[toIndex]];
+    }
+
+    private static findBusPath(pcIds: string[], fromIndex: number, toIndex: number): string[] {
+        // Bus topology: linear path along the bus
+        const path: string[] = [];
+        const start = Math.min(fromIndex, toIndex);
+        const end = Math.max(fromIndex, toIndex);
+        
+        for (let i = start; i <= end; i++) {
+            path.push(pcIds[i]);
+        }
+        
+        // Reverse if going backwards
+        if (fromIndex > toIndex) {
+            path.reverse();
+        }
+        
+        return path;
+    }
+
+    private static findRingPath(pcIds: string[], fromIndex: number, toIndex: number): string[] {
+        // Ring topology: shortest circular path
+        const n = pcIds.length;
+        const clockwiseDist = (toIndex - fromIndex + n) % n;
+        const counterClockwiseDist = (fromIndex - toIndex + n) % n;
+        
+        const path: string[] = [];
+        
+        if (clockwiseDist <= counterClockwiseDist) {
+            // Go clockwise
+            for (let i = 0; i <= clockwiseDist; i++) {
+                path.push(pcIds[(fromIndex + i) % n]);
+            }
+        } else {
+            // Go counter-clockwise
+            for (let i = 0; i <= counterClockwiseDist; i++) {
+                path.push(pcIds[(fromIndex - i + n) % n]);
+            }
+        }
+        
+        return path;
+    }
+
+    private static findTreePath(pcIds: string[], fromIndex: number, toIndex: number): string[] {
+        // Tree topology: traverse up to common ancestor, then down
+        const path: string[] = [];
+        
+        // Find path from source to root
+        const pathToRoot: number[] = [];
+        let current = fromIndex;
+        while (current >= 0) {
+            pathToRoot.push(current);
+            if (current === 0) break; // Reached root
+            current = Math.floor((current - 1) / 2); // Parent in binary tree
+        }
+        
+        // Find path from destination to root
+        const targetPathToRoot: number[] = [];
+        current = toIndex;
+        while (current >= 0) {
+            targetPathToRoot.push(current);
+            if (current === 0) break;
+            current = Math.floor((current - 1) / 2);
+        }
+        
+        // Find common ancestor
+        let commonAncestor = 0;
+        for (let i = pathToRoot.length - 1; i >= 0; i--) {
+            for (let j = targetPathToRoot.length - 1; j >= 0; j--) {
+                if (pathToRoot[i] === targetPathToRoot[j]) {
+                    commonAncestor = pathToRoot[i];
+                    break;
+                }
+            }
+        }
+        
+        // Build path: from source to common ancestor
+        for (let i = 0; i < pathToRoot.length; i++) {
+            path.push(pcIds[pathToRoot[i]]);
+            if (pathToRoot[i] === commonAncestor) break;
+        }
+        
+        // Then from common ancestor to destination (skip common ancestor as it's already in path)
+        const descendPath: number[] = [];
+        for (let i = 0; i < targetPathToRoot.length; i++) {
+            if (targetPathToRoot[i] === commonAncestor) {
+                // Add remaining path in reverse
+                for (let j = i - 1; j >= 0; j--) {
+                    descendPath.push(targetPathToRoot[j]);
+                }
+                break;
+            }
+        }
+        
+        for (const idx of descendPath) {
+            path.push(pcIds[idx]);
+        }
+        
+        return path;
+    }
 }
+
