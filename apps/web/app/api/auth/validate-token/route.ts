@@ -6,6 +6,9 @@ import { validateTokenSchema } from '@/lib/validations/auth'
 import { rateLimiter, RATE_LIMITS } from '@/lib/security/rate-limiter'
 import { securityLogger, SecurityEventType, LogLevel } from '@/lib/security/logger'
 
+
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     // Rate limiting

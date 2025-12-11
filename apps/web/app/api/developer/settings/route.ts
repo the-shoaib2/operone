@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
     try {
         // Simulate fetching developer settings
@@ -43,6 +46,9 @@ export async function GET() {
     }
 }
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 export async function PUT(request: NextRequest) {
     try {
         const body = await request.json()
@@ -73,6 +79,9 @@ export async function PUT(request: NextRequest) {
         )
     }
 }
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
     try {

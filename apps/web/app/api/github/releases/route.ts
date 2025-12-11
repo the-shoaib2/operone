@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const response = await fetch('https://api.github.com/repos/the-shoaib2/operone/releases/latest', {

@@ -110,7 +110,7 @@ export default defineConfig({
     },
     chunkSizeWarningLimit: 500,
     rollupOptions: {
-      external: ['better-sqlite3', '@repo/ai-engine', 'fs', 'path', 'os', 'child_process', '@repo/mcp-tools', 'ssh2', 'net', 'dgram', 'worker_threads', 'crypto', 'stream', 'util', 'events'],
+      external: ['better-sqlite3', '@repo/ai-engine', '@repo/operone', 'fs', 'path', 'os', 'child_process', '@repo/mcp-tools', 'ssh2', 'net', 'dgram', 'worker_threads', 'crypto', 'stream', 'util', 'events'],
       output: {
         // manualChunks(id) {
         //   if (id.includes('node_modules')) {

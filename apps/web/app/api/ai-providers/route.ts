@@ -4,6 +4,9 @@ import { NextResponse } from 'next/server';
 import { encryptApiKey, decryptApiKey } from '@/lib/encryption';
 import { z } from 'zod';
 
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic';
+
 // Validation schema
 const createProviderSchema = z.object({
   name: z.string().min(1).max(100),
@@ -22,7 +25,7 @@ const createProviderSchema = z.object({
 export async function GET() {
   try {
     const session = await auth();
-    
+
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -68,7 +71,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const session = await auth();
-    
+
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -89,7 +92,7 @@ export async function POST(request: Request) {
     }
 
     // Encrypt API key if provided
-    const encryptedApiKey = validatedData.apiKey 
+    const encryptedApiKey = validatedData.apiKey
       ? encryptApiKey(validatedData.apiKey)
       : null;
 

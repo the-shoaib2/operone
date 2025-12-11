@@ -1,13 +1,22 @@
 import { NextResponse } from 'next/server';
 import { fetchLatestRelease } from '@/lib/github-releases';
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 export const runtime = 'edge'; // Use Edge Runtime for better performance
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 export const revalidate = 3600; // Revalidate every hour
 
 /**
  * GET /api/releases/latest
  * Fetches the latest release data from GitHub
  */
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const release = await fetchLatestRelease();

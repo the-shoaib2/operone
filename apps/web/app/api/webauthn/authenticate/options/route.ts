@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { generateAuthenticationOptionsForUser } from '@/lib/webauthn'
 
+
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     const body = await req.json()

@@ -4,6 +4,9 @@ import { prisma } from '@/lib/prisma'
 import { verifyRegistrationResponseForUser } from '@/lib/webauthn'
 import type { RegistrationResponseJSON } from '@simplewebauthn/types'
 
+
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     const session = await auth()

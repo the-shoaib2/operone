@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
     try {
         // Simulate fetching repositories
@@ -54,6 +57,9 @@ export async function GET() {
         )
     }
 }
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
     try {
