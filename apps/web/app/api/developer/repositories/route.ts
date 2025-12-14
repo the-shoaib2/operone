@@ -58,8 +58,7 @@ export async function GET() {
     }
 }
 
-// Force dynamic rendering
-export const dynamic = 'force-dynamic';
+
 
 export async function POST(request: NextRequest) {
     try {

@@ -19,7 +19,7 @@ const PageLoader = () => (
     <div className="min-h-screen bg-dark-bg flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
             <Loader2 className="w-8 h-8 text-brand-primary animate-spin" />
-            <span className="text-dark-muted text-sm animate-pulse">Loading module...</span>
+            <span className="text-dark-muted text-sm">Loading..</span>
         </div>
     </div>
 );

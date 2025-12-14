@@ -28,8 +28,7 @@ export async function GET() {
     }
 }
 
-// Force dynamic rendering
-export const dynamic = 'force-dynamic';
+
 
 export async function PUT(request: NextRequest) {
     try {
@@ -60,8 +59,7 @@ export async function PUT(request: NextRequest) {
     }
 }
 
-// Force dynamic rendering
-export const dynamic = 'force-dynamic';
+
 
 export async function POST(request: NextRequest) {
     try {

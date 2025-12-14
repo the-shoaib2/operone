@@ -62,7 +62,7 @@ const nextConfig = {
         ]
     },
     // Exclude server-only packages from client bundles
-    serverExternalPackages: ['better-sqlite3'],
+    serverExternalPackages: ['better-sqlite3', 'ssh2', 'fsevents'],
 }
 
 export default nextConfig;
