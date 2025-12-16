@@ -1365,8 +1365,8 @@ importers:
         specifier: ^8.21.0
         version: 8.21.0
       systeminformation:
-        specifier: ^5.27.11
-        version: 5.27.13
+        specifier: ^5.27.14
+        version: 5.27.14
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -9182,8 +9182,8 @@ packages:
     peerDependencies:
       react: ^16.11.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
-  systeminformation@5.27.13:
-    resolution: {integrity: sha512-geeE/7eNDoOhdc9j+qCsLlwbcyh0HnqhOZzmfNK4WBioWGUZbhwYrg+YZsZ3UJh4tmybQsnDuqzr3UoumMifew==}
+  systeminformation@5.27.14:
+    resolution: {integrity: sha512-3DoNDYSZBLxBwaJtQGWNpq0fonga/VZ47HY1+7/G3YoIPaPz93Df6egSzzTKbEMmlzUpy3eQ0nR9REuYIycXGg==}
     engines: {node: '>=8.0.0'}
     os: [darwin, linux, win32, freebsd, openbsd, netbsd, sunos, android]
     hasBin: true
@@ -19486,7 +19486,7 @@ snapshots:
       react: 19.2.1
       use-sync-external-store: 1.6.0(react@19.2.1)
 
-  systeminformation@5.27.13: {}
+  systeminformation@5.27.14: {}
 
   tailwind-merge@3.4.0: {}
 
